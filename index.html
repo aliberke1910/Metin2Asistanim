@@ -1,0 +1,3052 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Metin2 Asistanım V5.2</title>
+    <style>
+        :root {
+            --bg-primary: #0b0d12;
+            --bg-card: rgba(20, 24, 36, 0.94);
+            --bg-input: rgba(28, 34, 52, 0.9);
+            --border-color: #283048;
+            --accent-gold: #e5a93b;
+            --accent-gold-glow: rgba(229, 169, 59, 0.25);
+            --text-main: #f1f5f9;
+            --text-muted: #8b9bb4;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --discord-blurple: #5865F2;
+            --google-red: #EA4335;
+            --low-profit: #ef4444;
+            --mid-profit: #f59e0b;
+            --high-profit: #10b981;
+            --info-blue: #38bdf8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        body {
+            background: linear-gradient(rgba(11, 13, 18, 0.8), rgba(11, 13, 18, 0.85)), 
+                        url('https://cdn.perdigital.com/contents/screen-shot/metin2-steam-basin-bulteni-pic.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-main);
+            padding: 12px;
+            padding-bottom: 60px;
+            min-height: 100vh;
+        }
+
+        .auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 13, 18, 0.96); display: flex; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(12px);
+        }
+        .auth-card {
+            background: var(--bg-card); border: 2px solid var(--accent-gold); border-radius: 18px; padding: 26px; max-width: 420px; width: 90%;
+            box-shadow: 0 0 45px var(--accent-gold-glow); display: flex; flex-direction: column; gap: 14px; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .auth-header { text-align: center; margin-bottom: 4px; }
+        .auth-header h2 { color: var(--accent-gold); font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; }
+        .auth-header p { color: var(--text-muted); font-size: 0.78rem; margin-top: 4px; }
+        .auth-tabs { display: flex; gap: 6px; background: var(--bg-input); padding: 4px; border-radius: 10px; margin-bottom: 4px; border: 1px solid var(--border-color); }
+        .auth-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 9px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all 0.25s; }
+        .auth-tab-btn.active { background: var(--accent-gold); color: #000; box-shadow: 0 0 10px var(--accent-gold-glow); }
+        .auth-form-group { display: flex; flex-direction: column; gap: 6px; }
+        .auth-form { display: none; flex-direction: column; gap: 12px; }
+        .auth-form.active { display: flex; }
+        .auth-link { font-size: 0.75rem; color: var(--info-blue); text-align: right; cursor: pointer; font-weight: 600; transition: color 0.2s; }
+        .auth-link:hover { color: var(--accent-gold); }
+
+        .oauth-divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.72rem; margin: 6px 0; }
+        .oauth-divider::before, .oauth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+        .oauth-divider::before { margin-right: .5em; } .oauth-divider::after { margin-left: .5em; }
+        .oauth-btn-group { display: flex; gap: 8px; }
+        .oauth-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: none; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .oauth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-google { background: var(--google-red); box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3); }
+        .btn-discord { background: var(--discord-blurple); box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3); }
+
+        .profile-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 13, 18, 0.85); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(8px); }
+        .profile-modal-box { background: var(--bg-card); border: 2px solid var(--accent-gold); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; box-shadow: 0 0 35px var(--accent-gold-glow); display: flex; flex-direction: column; gap: 12px; animation: modalPop 0.3s ease-out; }
+
+        .top-bar { max-width: 1050px; margin: 0 auto 12px auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; backdrop-filter: blur(8px); position: relative; z-index: 500; }
+        .char-selector-group { display: flex; align-items: center; gap: 6px; flex: 1; max-width: 380px; margin-left: auto; }
+        .settings-menu-container { position: relative; margin-left: 10px; z-index: 99999; }
+        .settings-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--accent-gold); padding: 7px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .settings-btn:hover { border-color: var(--accent-gold); box-shadow: 0 0 8px var(--accent-gold-glow); }
+        .settings-dropdown { position: absolute; top: 110%; right: 0; width: 260px; background: #0f121c; border: 1.5px solid var(--accent-gold); border-radius: 10px; padding: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9); display: none; flex-direction: column; gap: 10px; z-index: 99999; animation: fadeInDown 0.2s ease-out; }
+        .settings-dropdown.show { display: flex; }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-header { font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); padding-bottom: 6px; border-bottom: 1px dashed var(--border-color); text-transform: uppercase; letter-spacing: 0.5px; }
+        .dropdown-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.04); font-size: 0.78rem; color: var(--text-main); }
+        .dropdown-item.clickable { cursor: pointer; transition: background 0.2s; }
+        .dropdown-item.clickable:hover { background: rgba(229, 169, 59, 0.15); color: var(--accent-gold); }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-input); border: 1px solid var(--border-color); transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-green); border-color: var(--accent-green); }
+        input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
+
+        .app-layout { display: flex; gap: 12px; max-width: 1050px; margin: 0 auto; }
+        .sidebar-tabs { display: flex; flex-direction: column; gap: 6px; width: 175px; flex-shrink: 0; }
+        .tab-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 12px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s; white-space: normal; line-height: 1.3; backdrop-filter: blur(8px); }
+        .tab-btn.active { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); box-shadow: 0 0 12px var(--accent-gold-glow); }
+        
+        .content-area { flex: 1; min-width: 0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; overflow: hidden; backdrop-filter: blur(8px); }
+        .card-header { padding: 14px; font-size: 0.85rem; color: var(--accent-gold); letter-spacing: 0.5px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); user-select: none; }
+        .card-header:hover { background: rgba(255,255,255,0.04); }
+        .card-body { padding: 14px; border-top: 1px solid var(--border-color); display: none; }
+        .card.open .card-body { display: block; }
+        .arrow { transition: transform 0.2s; }
+        .card.open .arrow { transform: rotate(180deg); }
+
+        .sub-section-title { font-size: 0.8rem; font-weight: 800; color: var(--accent-gold); margin: 12px 0 8px 0; padding-bottom: 4px; border-bottom: 1px dashed var(--border-color); display: flex; align-items: center; gap: 6px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+        .won-layout-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; align-items: start; }
+
+        label { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+        input, select, textarea { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-gold); }
+
+        .btn { width: 100%; background: var(--accent-gold); color: #000; border: none; padding: 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-green { background: var(--accent-green); color: #fff; }
+        .btn-red { background: var(--accent-red); color: #fff; }
+        .btn-blue { background: var(--accent-blue); color: #fff; }
+        .btn-sm { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 800; }
+
+        .timer-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; text-align: center; transition: all 0.3s; }
+        .timer-val { font-size: 1.05rem; font-weight: 800; color: var(--accent-gold); }
+        .timer-lbl { font-size: 0.65rem; color: var(--text-muted); }
+
+        .big-timer-box { background: linear-gradient(135deg, rgba(229, 169, 59, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%); border: 2px solid var(--accent-gold); padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 0 15px var(--accent-gold-glow); }
+        .big-timer-val { font-size: 1.4rem; font-weight: 900; color: var(--accent-gold); }
+        .big-timer-lbl { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 2px; }
+
+        .timer-box.alarm-active { background: rgba(16, 185, 129, 0.15); border-color: var(--accent-green); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+        .timer-box.alarm-active .timer-val { color: var(--accent-green); }
+
+        .check-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; }
+        .check-item:last-child { border-bottom: none; }
+
+        .progress-bar { height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+        .progress-fill { height: 100%; background: var(--accent-gold); width: 0%; transition: width 0.3s; }
+
+        .note-card { background: var(--bg-input); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 0.8rem; }
+
+        .inv-accordion-item { margin-bottom: 6px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: var(--bg-input); }
+        .inv-accordion-header { padding: 10px 12px; font-weight: 700; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--accent-gold); background: rgba(255,255,255,0.02); user-select: none; }
+        .inv-accordion-header:hover { background: rgba(255,255,255,0.04); }
+        .inv-accordion-header span.inv-arrow { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.3s; display: inline-block; }
+        .inv-accordion-item.active .inv-accordion-header span.inv-arrow { transform: rotate(180deg); }
+        .inv-accordion-content { display: none; padding: 8px; background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-direction: column; gap: 6px; }
+        .inv-accordion-item.active .inv-accordion-content { display: flex; }
+
+        .breakdown-box { background: var(--bg-input); border: 1px dashed var(--border-color); border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 0.75rem; }
+        .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-muted); font-size: 0.78rem; }
+        .breakdown-item:last-child { border-bottom: none; }
+
+        .history-sidebar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; backdrop-filter: blur(8px); display: flex; flex-direction: column; height: 100%; }
+        .history-sidebar-header { padding: 12px 14px; font-size: 0.8rem; color: var(--accent-gold); font-weight: 800; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .history-sidebar-body { padding: 12px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .history-sidebar-footer { padding: 12px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 8px; }
+        .history-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(6px); }
+        .modal-box { background: var(--bg-card); border: 2px solid var(--accent-gold); border-radius: 16px; padding: 24px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 35px var(--accent-gold-glow); animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .calc-wrapper .card { background: rgba(19, 22, 34, 0.95); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+        .calc-wrapper .section-title { font-size: 0.9rem; color: var(--text-main); margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .calc-wrapper .step-label { background: var(--accent-gold); color: #000; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; }
+        .calc-wrapper .radio-btn { position: relative; }
+        .calc-wrapper .radio-btn input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .calc-wrapper .radio-label { display: block; background: var(--bg-input); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 6px; text-align: center; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+        .calc-wrapper .radio-btn input:checked + .radio-label { border-color: var(--accent-gold); background: var(--accent-gold-glow); color: var(--accent-gold); }
+        .calc-wrapper .accordion-item { margin-bottom: 8px; border: 1.5px solid var(--border-color); border-radius: 10px; overflow: hidden; background: var(--bg-input); }
+        .calc-wrapper .accordion-header { padding: 12px 14px; font-weight: 700; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--text-main); background: transparent; }
+        .calc-wrapper .accordion-header:hover { background: rgba(255,255,255,0.03); }
+        .calc-wrapper .accordion-header::after { content: '⌄'; font-size: 1.1rem; color: var(--accent-gold); transition: transform 0.3s; }
+        .calc-wrapper .accordion-item.active .accordion-header::after { transform: rotate(180deg); }
+        .calc-wrapper .accordion-content { display: none; padding: 8px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border-color); }
+        .calc-wrapper .accordion-item.active .accordion-content { display: block; }
+
+        .calc-wrapper .nested-accordion { margin: 6px 0; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: var(--bg-primary); }
+        .calc-wrapper .nested-header { padding: 10px 12px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .calc-wrapper .nested-header::after { content: '⌄'; color: var(--accent-gold); }
+        .calc-wrapper .nested-accordion.active .nested-header::after { transform: rotate(180deg); }
+        .calc-wrapper .nested-content { display: none; padding: 6px; border-top: 1px solid var(--border-color); }
+        .calc-wrapper .nested-accordion.active .nested-content { display: block; }
+
+        .calc-wrapper .sub-item-container { margin: 6px 0; background: var(--bg-primary); border-radius: 8px; overflow: hidden; }
+        .calc-wrapper .sub-item-row { display: flex; align-items: center; gap: 6px; padding: 6px; }
+        .calc-wrapper .sub-item { flex: 1; padding: 10px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); color: var(--text-muted); }
+        .calc-wrapper .sub-item:hover { background: var(--border-color); color: var(--text-main); }
+        .calc-wrapper .sub-item.selected { background: var(--accent-gold-glow); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+        
+        .calc-wrapper .sub-item.selected span[style*="border"] {
+            color: #000 !important; background: var(--accent-gold) !important; border-color: var(--accent-gold) !important;
+        }
+
+        .calc-wrapper .info-btn { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--info-blue); padding: 8px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .calc-wrapper .locked { opacity: 0.35; pointer-events: none; filter: grayscale(0.5); }
+        .calc-wrapper .result-card { text-align: center; border-top: 5px solid var(--border-color); background: linear-gradient(180deg, rgba(20, 24, 36, 0.95) 0%, rgba(25, 30, 48, 0.95) 100%); }
+        .calc-wrapper .result-card.low { border-color: var(--low-profit); }
+        .calc-wrapper .result-card.mid { border-color: var(--mid-profit); }
+        .calc-wrapper .result-card.high { border-color: var(--high-profit); }
+        .calc-wrapper .profit-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
+        .calc-wrapper .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--low-profit); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .calc-wrapper .badge-mid { background: rgba(245, 158, 11, 0.15); color: var(--mid-profit); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .calc-wrapper .badge-high { background: rgba(16, 185, 129, 0.15); color: var(--high-profit); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .calc-wrapper .read-only-box { background: var(--bg-primary); border: 1.5px solid var(--border-color); color: var(--accent-gold); padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-align: center; }
+
+        .afk-accordion-box { border: 1.5px solid var(--border-color); border-radius: 10px; overflow: hidden; background: var(--bg-input); margin-bottom: 10px; }
+        .afk-accordion-title { padding: 10px 14px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(255,255,255,0.02); user-select: none; }
+        .afk-accordion-title:hover { background: rgba(255,255,255,0.04); }
+        .afk-accordion-body { display: none; padding: 10px; background: var(--bg-primary); border-top: 1px solid var(--border-color); }
+        .afk-accordion-box.active .afk-accordion-body { display: block; }
+
+        .tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-gold); color: #000; font-size: 0.65rem; font-weight: 900; cursor: help; margin-left: 4px; vertical-align: middle; }
+
+        .version-tag {
+            position: fixed; bottom: 10px; right: 12px; background: rgba(11, 13, 18, 0.85); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; backdrop-filter: blur(4px); box-shadow: 0 0 8px var(--accent-gold-glow); z-index: 1000; cursor: pointer; user-select: none; transition: transform 0.1s;
+        }
+        .version-tag:active { transform: scale(0.92); }
+
+        .footer-privacy-link {
+            text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: center; gap: 16px;
+        }
+        .footer-privacy-link a {
+            color: var(--accent-gold); text-decoration: none; font-weight: 600; transition: color 0.2s;
+        }
+        .footer-privacy-link a:hover {
+            text-decoration: underline; color: #fff;
+        }
+
+        @media (max-width: 820px) {
+            .app-layout { flex-direction: column; }
+            .sidebar-tabs { width: 100%; flex-direction: row; overflow-x: auto; }
+            .tab-btn { white-space: nowrap; }
+            .top-bar { flex-direction: column; align-items: stretch; }
+            .char-selector-group { max-width: 100%; }
+            .won-layout-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-overlay" id="auth-overlay">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>🛡️ Metin2 Asistanım</h2>
+            <p>Devam etmek için lütfen giriş yapın veya hesap oluşturun.</p>
+        </div>
+
+        <div class="auth-tabs" id="auth-tab-buttons">
+            <button class="auth-tab-btn active" onclick="switchAuthTab('login')">Giriş Yap</button>
+            <button class="auth-tab-btn" onclick="switchAuthTab('register')">Kayıt Ol</button>
+        </div>
+
+        <div class="auth-form active" id="form-login">
+            <div class="auth-form-group">
+                <label>Kullanıcı Adı veya E-posta</label>
+                <input type="text" id="login-user" placeholder="Kullanıcı adınız...">
+            </div>
+            <div class="auth-form-group">
+                <label>Şifre</label>
+                <input type="password" id="login-pass" placeholder="Şifreniz...">
+            </div>
+            <span class="auth-link" onclick="switchAuthTab('forgot')">Şifremi Unuttum?</span>
+            <button class="btn btn-green" onclick="handleLogin()">Giriş Yap</button>
+            
+            <div class="oauth-divider">veya şununla bağlan</div>
+            <div class="oauth-btn-group">
+                <button class="oauth-btn btn-google" onclick="handleOAuthLogin('Google')">🌐 Google ile Giriş</button>
+                <button class="oauth-btn btn-discord" onclick="handleOAuthLogin('Discord')">💬 Discord ile Giriş</button>
+            </div>
+        </div>
+
+        <div class="auth-form" id="form-register">
+            <div class="auth-form-group">
+                <label>Kullanıcı Adı Seç</label>
+                <input type="text" id="reg-user" placeholder="Örn: Nixen">
+            </div>
+            <div class="auth-form-group">
+                <label>E-posta Adresi</label>
+                <input type="email" id="reg-email" placeholder="ornek@mail.com">
+            </div>
+            <div class="auth-form-group">
+                <label>Şifre Belirle</label>
+                <input type="password" id="reg-pass" placeholder="Güçlü bir şifre...">
+            </div>
+            <button class="btn btn-blue" onclick="handleRegister()">Hesap Oluştur</button>
+        </div>
+
+        <div class="auth-form" id="form-forgot">
+            <div class="auth-form-group">
+                <label>Kayıtlı E-posta Adresiniz</label>
+                <input type="email" id="forgot-email" placeholder="ornek@mail.com">
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+                💡 Güvenlik doğrulaması için kayıtlı e-postanıza simüle edilmiş sıfırlama bağlantısı gönderilecektir.
+            </div>
+            <button class="btn" style="background:var(--accent-gold); color:#000;" onclick="handleForgotPass()">Sıfırlama Bağlantısı Gönder</button>
+            <span class="auth-link" style="text-align:center;" onclick="switchAuthTab('login')">← Giriş Ekranına Dön</span>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="alarm-modal">
+    <div class="modal-box">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;" id="modal-icon">🔔</div>
+        <div style="font-size: 1.05rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 6px;" id="modal-title">Bildirim</div>
+        <div id="modal-desc" style="font-size: 0.85rem; color: var(--text-main); margin-bottom: 18px; line-height: 1.4;">İşlem başarıyla tamamlandı.</div>
+        <button class="btn btn-green" onclick="closeAlarmModal()">Tamam</button>
+    </div>
+</div>
+
+<div class="profile-modal-overlay" id="profile-modal">
+    <div class="profile-modal-box">
+        <div style="font-size: 1rem; font-weight: 800; color: var(--accent-gold); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+            <span>👤 Hesabım ve Güvenlik</span>
+            <button class="btn-sm btn-red" onclick="closeProfileModal()" style="padding: 2px 6px;">✕</button>
+        </div>
+        <div class="auth-form-group">
+            <label>Kullanıcı Adı (ID)</label>
+            <input type="text" id="prof-username" readonly style="background: var(--bg-primary); color: var(--accent-gold);">
+        </div>
+        <div class="auth-form-group">
+            <label>E-posta Adresi</label>
+            <input type="email" id="prof-email" placeholder="E-postanız...">
+        </div>
+        <div class="auth-form-group">
+            <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+            <input type="password" id="prof-newpass" placeholder="Yeni şifreniz...">
+        </div>
+        <button class="btn btn-green" onclick="saveProfileChanges()" style="margin-top: 4px;">Değişiklikleri Kaydet</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="privacy-modal">
+    <div class="modal-box" style="max-width: 620px; text-align: left; max-height: 80vh; overflow-y: auto;">
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 12px;">
+            <span>📜 Gizlilik Politikası & Çerez Bildirimi</span>
+            <button class="btn-sm btn-red" onclick="closePrivacyModal()" style="padding: 2px 8px;">✕</button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-main); line-height: 1.6;">
+            <p style="color:var(--text-muted); font-size:0.75rem;">Son Güncelleme: Kasım 2026</p>
+            <br>
+            <p><b>Metin2 Asistanım</b> olarak ziyaretçilerimizin gizliliğine büyük önem veriyoruz. Bu gizlilik politikası belgesi, sitemiz tarafından toplanan kişisel bilgilerin türlerini ve bunların nasıl kullanıldığını açıklar.</p>
+            
+            <h4 style="color:var(--accent-gold); margin-top:12px;">1. Çerezler (Cookies) ve Yerel Depolama</h4>
+            <p style="color:var(--text-muted);">Sitemiz, kullanıcı tercihlerini depolamak (karakter verileri, oyun notları, ayarlar) ve site deneyimini geliştirmek için tarayıcınızın Local Storage ve Çerez altyapısını kullanır.</p>
+            
+            <h4 style="color:var(--accent-gold); margin-top:12px;">2. Google Reklamları ve DART Çerezi</h4>
+            <p style="color:var(--text-muted);">Sitemizde üçüncü taraf satıcı olarak Google, reklam yayınlamak için çerezleri kullanabilir. Google'ın DART çerezleri, kullanıcılarımıza sitemize ve internetteki diğer sitelere yaptıkları ziyaretlere dayalı olarak reklam sunmasına olanak tanır. Kullanıcılar, Google reklam gizlilik politikasını ziyaret ederek DART çerezi kullanımını engelleyebilirler.</p>
+            
+            <h4 style="color:var(--accent-gold); margin-top:12px;">3. Üçüncü Taraf Reklam Ağları</h4>
+            <p style="color:var(--text-muted);">Google AdMob veya AdSense gibi üçüncü taraf reklam sunucuları, tarayıcınıza gönderilen reklamların performansını ölçmek ve özelleştirmek için çerezler ve web işaretçileri kullanabilir.</p>
+
+            <h4 style="color:var(--accent-gold); margin-top:12px;">4. Veri Güvenliği</h4>
+            <p style="color:var(--text-muted);">Sistemimizde tutulan hesap ve karakter verileriniz tamamen sizin tarayıcınızda veya güvenli veritabanımızda saklanır. 3. şahıslarla asla paylaşılmaz.</p>
+
+            <h4 style="color:var(--accent-gold); margin-top:12px;">5. İletişim</h4>
+            <p style="color:var(--text-muted);">Gizlilik politikamız veya platformla ilgili her türlü soru ve geri bildiriminiz için resmi iletişim adresimiz: <b style="color:var(--info-blue);">metin2asistanim@gmail.com</b></p>
+        </div>
+        <button class="btn btn-green" onclick="closePrivacyModal()" style="margin-top: 14px;">Anladım / Kapat</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="contact-modal">
+    <div class="modal-box" style="max-width: 440px; text-align: center;">
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 14px;">
+            <span>📬 İletişim & Destek</span>
+            <button class="btn-sm btn-red" onclick="closeContactModal()" style="padding: 2px 8px;">✕</button>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-main); line-height: 1.6;">
+            <p style="margin-bottom:12px; color:var(--text-muted);">Metin2 Asistanım yönetimi ile görüşmek, öneri, hata bildirimi veya reklam/iş birliği talepleriniz için bize ulaşabilirsiniz.</p>
+            
+            <div style="background:var(--bg-primary); border:1.5px solid var(--accent-gold); border-radius:10px; padding:12px; margin-bottom:14px;">
+                <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:2px;">Resmi E-Posta Adresimiz:</span>
+                <span style="font-size:0.95rem; font-weight:800; color:var(--accent-gold); font-family:monospace;" id="contact-email-text">metin2asistanim@gmail.com</span>
+            </div>
+            
+            <button class="btn btn-blue" onclick="copyContactEmail()" style="font-size:0.78rem;">📋 E-Posta Adresini Kopyala</button>
+        </div>
+        <button class="btn btn-green" onclick="closeContactModal()" style="margin-top: 12px;">Kapat</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="story-modal">
+    <div class="modal-box" style="max-width: 500px; text-align: left; max-height: 80vh; overflow-y: auto;">
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 12px;">
+            <span>📖 Hikayemiz</span>
+            <button class="btn-sm btn-red" onclick="closeStoryModal()" style="padding: 2px 8px;">✕</button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-main); line-height: 1.6;">
+            <p>Neredeyse 20 yıldır tutkuyla oynadığım Metin2'de, yıllar geçtikçe oyunun detayları, farm rotaları, karakter statüleri ve boss saatleri gibi onlarca farklı mekaniği takip etmenin zorluğunu hep hissettim.</p><br>
+            <p>Bir gün, hem kendi ihtiyaçlarımı gidermek hem de birden fazla karakterin gelişimini daha pratik bir şekilde yönetebilmek için <i>"Neden tüm bunları tek bir yerden takip edebileceğim bir asistanım olmasın?"</i> diye düşündüm.</p><br>
+            <p>Böylece <b>Metin2 Asistanım</b> fikri doğdu. Bu site, yılların getirdiği deneyimleri daha geniş kitlelerle paylaşmak, yeni veya eski fark etmeksizin her oyuncuya yardımcı olabilmek amacıyla hazırlandı. Umarım oyun deneyiminize güzel bir katkı sağlar ve bu asistanla siz de karakterlerinizi zirveye taşırsınız! Öneri, istek ve iş birlliğiniz için mail atabilirsiniz.</p>
+        </div>
+        <button class="btn btn-green" onclick="closeStoryModal()" style="margin-top: 14px;">Kapat</button>
+    </div>
+</div>
+
+<div class="top-bar">
+    <div style="font-weight: 800; color: var(--accent-gold); font-size: 0.9rem;">
+        👤 Karakter: <span id="active-char-display" style="color: #fff;">Ana Karakter</span>
+    </div>
+    <div class="char-selector-group">
+        <select id="char-dropdown" onchange="switchCharacter(this.value)"></select>
+        <input type="text" id="new-char-nick" placeholder="Yeni Nick..." style="width: 100px;">
+        <button class="btn-sm btn-green" onclick="addNewCharacter()">+ Ekle</button>
+    </div>
+    
+    <div class="settings-menu-container">
+        <button class="settings-btn" onclick="toggleSettingsDropdown(event)">⚙️ Ayarlar ▾</button>
+        <div class="settings-dropdown" id="settings-dropdown-menu">
+            <div class="dropdown-header">⚙️ Sistem Ayarları</div>
+            <div class="dropdown-item">
+                <span>🔊 Tıklama Sesi</span>
+                <label class="switch">
+                    <input type="checkbox" id="sound-toggle-chk" checked onchange="toggleSoundSetting(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="dropdown-header" style="margin-top:4px;">👤 Üyelik & Profil</div>
+            <div class="dropdown-item clickable" onclick="openProfileModal()">
+                <span>👤 Hesabım (Profil)</span>
+                <span style="font-size:0.65rem; color:var(--accent-gold);">Yönet</span>
+            </div>
+            <div class="dropdown-item clickable" onclick="openContactModal()">
+                <span>📬 İletişim & Destek</span>
+                <span style="font-size:0.65rem; color:var(--info-blue);">Bize Ulaşın</span>
+            </div>
+            <div class="dropdown-item clickable" onclick="handleLogout()">
+                <span>🚪 Oturumu Kapat (Çıkış)</span>
+                <span style="font-size:0.65rem; color:var(--accent-red);">Güvenli</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-layout">
+
+    <div class="sidebar-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-calc', this)">🧮 1. Farm Analizi/Öneri Asistanım</button>
+        <button class="tab-btn" onclick="switchTab('tab-farm', this)">📊 2. Kazanç Asistanım</button>
+        <button class="tab-btn" onclick="switchTab('tab-bio', this)">🧪 3. Biyolog Görev Asistanım</button>
+        <button class="tab-btn" onclick="switchTab('tab-time', this)">⏱️ 4. Süre ve Sayaç Asistanım</button>
+        <button class="tab-btn" onclick="switchTab('tab-util', this)">🛠️ 5. Araçlarım & Notlarım</button>
+    </div>
+
+    <div class="content-area">
+
+        <!-- 1. SEKME: FARM ANALİZİ -->
+        <div id="tab-calc" class="tab-content active">
+            <div class="calc-wrapper">
+                
+                <div class="card" style="background: rgba(229, 169, 59, 0.08); border-color: var(--accent-gold);">
+                    <div style="font-size: 0.78rem; color: var(--accent-gold); line-height: 1.5; font-weight: 600;">
+                        💡 <b>Tecrübe & Kazanç Uyarısı:</b> Bu analizlerde sunulan veriler, tamamen kişisel oyun tecrübelerimize, ortalama drop oranlarına ve piyasa gözlemlerine dayanmaktadır. Unutmayın ki Metin2'de şans (RNG), sunucu ekonomisi, efsun ve simya seviyeleriniz nedeniyle <b>herkes aynı kazancı elde edemez</b>. Kendi droplarınıza göre miktarları ve birim fiyatları dilediğiniz gibi güncelleyebilirsiniz!<br><br>
+                        💡 <b>Bu bölüm tavsiye edilen farm önerileri içermektedir.</b>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title"><span class="step-label">1</span> Farm Tarzını Seç</div>
+                    <div class="grid-2">
+                        <div class="radio-btn">
+                            <input type="radio" id="type-afk" name="farm_type" value="afk" onchange="onCalcTypeChange()">
+                            <label for="type-afk" class="radio-label">🤖 AFK Farm</label>
+                        </div>
+                        <div class="radio-btn">
+                            <input type="radio" id="type-manual" name="farm_type" value="manual" onchange="onCalcTypeChange()">
+                            <label for="type-manual" class="radio-label">⚔️ El ile (Manuel) Farm</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title"><span class="step-label">2</span> Won Fiyatı (TL/W) Belirle</div>
+                    <div>
+                        <label>1 Won Fiyatı (₺) - Kendiniz Düzenleyin</label>
+                        <input type="number" id="calc-won-price" value="7.65" step="0.01" oninput="calculateCalc()">
+                        <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px;">Sunucu piyasanıza göre 1 Won'un Türk Lirası karşılığını dilediğiniz gibi değiştirebilirsiniz.</div>
+                    </div>
+                </div>
+
+                <div class="card locked" id="step-3-card">
+                    <div class="section-title"><span class="step-label">3</span> Farm Yöntemi Seçin</div>
+                    <div id="accordion-container"></div>
+                </div>
+
+                <div class="card locked" id="step-4-card">
+                    <div class="section-title"><span class="step-label">4</span> Süre ve Masraflar</div>
+                    
+                    <!-- AFK İÇİN SADECE SÜRE VE MASRAF SEÇİMİ -->
+                    <div id="afk-custom-inputs" style="display: none;">
+                        
+                        <div class="afk-accordion-box" id="afk-acc-time">
+                            <div class="afk-accordion-title" onclick="toggleAfkAccordion(this)">Kaç saat farm atıldı?</div>
+                            <div class="afk-accordion-body">
+                                <div class="grid-4">
+                                    <div class="radio-btn"><input type="radio" id="afk-dur-1s" name="afk_preset" value="1" onchange="calculateCalc()"><label for="afk-dur-1s" class="radio-label">1 Saat</label></div>
+                                    <div class="radio-btn"><input type="radio" id="afk-dur-1g" name="afk_preset" value="24" checked onchange="calculateCalc()"><label for="afk-dur-1g" class="radio-label">1 Gün (24s)</label></div>
+                                    <div class="radio-btn"><input type="radio" id="afk-dur-1h" name="afk_preset" value="168" onchange="calculateCalc()"><label for="afk-dur-1h" class="radio-label">1 Hafta</label></div>
+                                    <div class="radio-btn"><input type="radio" id="afk-dur-1a" name="afk_preset" value="720" onchange="calculateCalc()"><label for="afk-dur-1a" class="radio-label">1 Ay (30G)</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="afk-accordion-box" id="afk-acc-expense">
+                            <div class="afk-accordion-title" onclick="toggleAfkAccordion(this)">Masraf Yönetimi</div>
+                            <div class="afk-accordion-body">
+                                <label>Masraflar (Won) <span class="tooltip-icon" onclick="showCustomAlert('Masraflar Nedir?', 'Simya uzatma, şebnem, iksirler vb. harcamalarınızı bu alana Won cinsinden yazabilirsiniz.', '💡')">?</span></label>
+                                <input type="number" id="afk-expense-won" value="0" min="0" step="0.1" placeholder="Harcanan Won (Simya, İksir vb.)..." oninput="calculateCalc()">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- STANDART (MANUEL) FARM INPUTLARI -->
+                    <div id="standard-inputs">
+                        <div class="grid-2" style="margin-bottom:10px;">
+                            <div><label>Kaç saat farm atıldı?</label><input type="number" id="calc-farm-hours" value="1" min="0.1" step="0.5" oninput="calculateCalc()"></div>
+                            <div><label>Brüt Saatlik Kazanç (Won)</label><input type="number" id="calc-hourly-gross" value="0" min="0" step="0.1" oninput="calculateCalc()"></div>
+                        </div>
+                        <div id="expense-group">
+                            <label>Masraflar (Won) <span class="tooltip-icon" onclick="showCustomAlert('Masraflar Nedir?', 'Simya uzatma, şebnem, iksirler vb. harcamalarınızı bu alana Won cinsinden yazabilirsiniz.', '💡')">?</span></label>
+                            <input type="number" id="calc-expense-m" value="0" min="0" step="0.1" placeholder="Örn: 0.5" oninput="calculateCalc()">
+                        </div>
+                    </div>
+                    
+                    <div id="info-card" style="display: none;" class="info-box"></div>
+                </div>
+
+                <div class="card result-card low" id="result-card">
+                    <span class="profit-badge badge-low" id="profit-badge">Düşük Kazanç</span>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);" id="selected-farm-name">Lütfen seçim yapın</div>
+                    
+                    <div class="grid-2" style="margin-top: 8px; margin-bottom: 8px;">
+                        <div class="big-timer-box">
+                            <div class="big-timer-lbl">TOPLAM NET TL GELİRİ</div>
+                            <div class="big-timer-val" id="net-tl-display">0.00 ₺</div>
+                        </div>
+                        <div class="big-timer-box">
+                            <div class="big-timer-lbl">TOPLAM NET WON GELİRİ</div>
+                            <div class="big-timer-val" id="net-won-display" style="color:var(--accent-gold);">0.00 W</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:10px;" id="standard-result-boxes">
+                        <div class="timer-box"><div class="timer-lbl">Toplam Net Won Geliri</div><div class="timer-val" id="hourly-won-display">0.00 W</div></div>
+                        <div class="timer-box"><div class="timer-lbl">Saatlik TL</div><div class="timer-val" id="hourly-tl-display" style="color:var(--text-main)">0.00 ₺</div></div>
+                        <div class="timer-box"><div class="timer-lbl">Toplam Brüt Won</div><div class="timer-val" id="gross-won-display">0.00 W</div></div>
+                        <div class="timer-box"><div class="timer-lbl">Toplam Masraf</div><div class="timer-val" id="expense-won-display" style="color:var(--accent-red)">0.00 W</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SEKME: WON KAZANÇLARIM -->
+        <div id="tab-farm" class="tab-content">
+            <div class="won-layout-grid">
+                
+                <div>
+                    <div class="card open" style="margin-bottom:12px;">
+                        <div class="card-header" onclick="toggleCard(this)">
+                            <span style="display:flex; align-items:center; gap:8px;">💰 Günlük Farm</span>
+                            <div style="display:flex; gap:6px;" onclick="event.stopPropagation()">
+                                <button class="btn-sm btn-green" onclick="saveCurrentDayRecord();" style="padding:6px 10px; font-size:0.75rem;">💾 Günü Kaydet</button>
+                                <button class="btn-sm btn-red" onclick="resetCurrentDayData();" style="padding:6px 10px; font-size:0.75rem;">🔄 Günü Sıfırla</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            
+                            <div class="grid-3" style="margin-bottom:8px;">
+                                <div><label>Won Kazancı</label><input type="number" id="farm-won" value="0" step="0.1" oninput="calcTotalIncome(); saveCurrentCharData();"></div>
+                                <div><label>Yang Kazancı (M)</label><input type="number" id="farm-yang" value="0" step="1" oninput="calcTotalIncome(); saveCurrentCharData();"></div>
+                                <div><label>Won Kuru (TL/W)</label><input type="number" id="farm-rate" value="7.65" step="0.05" oninput="calcTotalIncome(); saveCurrentCharData();"></div>
+                            </div>
+
+                            <div class="sub-section-title">📦 Farmladığım Sandıklar & Değerli Eşyalar</div>
+                            <div class="grid-2" style="margin-bottom:8px;">
+                                <div>
+                                    <label>Sandık / Materyal Seç</label>
+                                    <select id="chest-select">
+                                        <optgroup label="Zindan & Raid Sandıkları">
+                                            <option value="TS Jotun Sandığı">TS Jotun Sandığı</option>
+                                            <option value="TS Razador Sandığı">TS Razador Sandığı</option>
+                                            <option value="TS Nemere Sandığı">TS Nemere Sandığı</option>
+                                            <option value="TS Beran Setaou Sandığı">TS Beran Setaou Sandığı</option>
+                                            <option value="Jotun Thrym Sandığı">Jotun Thrym Sandığı</option>
+                                            <option value="Bagjanamu Sandığı">Bagjanamu Sandığı</option>
+                                            <option value="Razador Sandığı">Razador Sandığı</option>
+                                            <option value="Nemere Sandığı">Nemere Sandığı</option>
+                                            <option value="Beran Setaou Sandığı">Beran Setaou Sandığı</option>
+                                            <option value="Alastor Sandığı">Alastor Sandığı</option>
+                                            <option value="Balator Sandığı">Balator Sandığı</option>
+                                            <option value="Aamon Sandığı">Aamon Sandığı</option>
+                                            <option value="Meley Sandığı">Meley Sandığı</option>
+                                            <option value="Hidra Sandığı">Hidra Sandığı</option>
+                                            <option value="Zodyak Sandığı">Zodyak Sandığı</option>
+                                        </optgroup>
+                                        <optgroup label="Yohara & Harita Materyalleri">
+                                            <option value="Yılad Ruh Taşı / Parıltılı İstiridye">Yılad Ruh Taşı / Parıltılı İstiridye</option>
+                                            <option value="Donmuş Anahtar">Donmuş Anahtar</option>
+                                            <option value="Büyülü Metal / Parçası">Büyülü Metal / Parçası</option>
+                                            <option value="Aura Giysisi Parçaları">Aura Giysisi Parçaları</option>
+                                            <option value="Elementer Parçalar & Taşlar">Elementer Parçalar & Taşlar</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:flex-end;">
+                                    <button class="btn btn-green" onclick="addSelectedChest()">+ Listeye Ekle</button>
+                                </div>
+                            </div>
+                            <div id="active-chest-list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card open" style="margin-bottom:12px;">
+                        <div class="card-header" onclick="toggleCard(this)">
+                            <span style="display:flex; align-items:center; gap:8px;">⚔️ Paralı Asker Günlük Kazancım</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="background:var(--bg-input); border:1px solid var(--border-color); padding:10px; border-radius:8px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.78rem; font-weight:700; color:var(--accent-gold);">Elde Edilen Nesne Seçimi (Alfabetik)</span>
+                                    <button type="button" class="btn-sm btn-blue" onclick="addAskerItemToIncome()">+ Seçilen Nesneyi Ekle</button>
+                                </div>
+                                <div class="grid-2">
+                                    <div>
+                                        <label>Olası Çıkan Tüm Nesneler</label>
+                                        <select id="asker-item-select" style="max-height:220px;">
+                                            <option value="6-7. Bonus Parçaları">6-7. Bonus Parçaları</option>
+                                            <option value="9. Yolun Kitap Sandığı">9. Yolun Kitap Sandığı</option>
+                                            <option value="Aamon Sandığı">Aamon Sandığı</option>
+                                            <option value="Aamon Yumurtası">Aamon Yumurtası</option>
+                                            <option value="Ahtrin Usta Sandığı">Ahtrin Usta Sandığı</option>
+                                            <option value="Alev Yaprağı">Alev Yaprağı</option>
+                                            <option value="Altın Yaldızlı Sandık">Altın Yaldızlı Sandık</option>
+                                            <option value="Ay Işığı Orkidesi">Ay Işığı Orkidesi</option>
+                                            <option value="Ay Işığı Sanrı Parçası">Ay Işığı Sanrı Parçası</option>
+                                            <option value="Ay Taşı">Ay Taşı</option>
+                                            <option value="Ay Taşı +4">Ay Taşı +4</option>
+                                            <option value="Ayaz Kökü">Ayaz Kökü</option>
+                                            <option value="Bagjanamu Sandığı">Bagjanamu Sandığı</option>
+                                            <option value="Beran Setaou Sandığı">Beran Setaou Sandığı</option>
+                                            <option value="Beyaz Ejderha Başı / Pulu">Beyaz Ejderha Başı / Pulu</option>
+                                            <option value="Canlılık Taşı +4">Canlılık Taşı +4</option>
+                                            <option value="Çeşitli Balıklar">Çeşitli Balıklar</option>
+                                            <option value="Deri Sertleştirici+">Deri Sertleştirici+</option>
+                                            <option value="Direnç Taşı +4">Direnç Taşı +4</option>
+                                            <option value="Donmuş Anahtar">Donmuş Anahtar</option>
+                                            <option value="Ejderha Alevi (B)">Ejderha Alevi (B)</option>
+                                            <option value="Elementlerin Taşı +4">Elementlerin Taşı +4</option>
+                                            <option value="Gece Jediti">Gece Jediti</option>
+                                            <option value="Gizemli Bilet">Gizemli Bilet</option>
+                                            <option value="Gizemli Taş">Gizemli Taş</option>
+                                            <option value="Gnoll Usta Sandığı">Gnoll Usta Sandığı</option>
+                                            <option value="Hazine Parşömeni (Derece A, B, C)">Hazine Parşömeni (Derece A, B, C)</option>
+                                            <option value="Hidra Sandığı">Hidra Sandığı</option>
+                                            <option value="İrade Topazı">İrade Topazı</option>
+                                            <option value="Jotun Sandığı">Jotun Sandığı</option>
+                                            <option value="Kalp Anahtarı">Kalp Anahtarı</option>
+                                            <option value="Kanama Taşı +4">Kanama Taşı +4</option>
+                                            <option value="Kara Boynuz">Kara Boynuz</option>
+                                            <option value="Kara Diken">Kara Diken</option>
+                                            <option value="Kobalt">Kobalt</option>
+                                            <option value="Koyu Deri">Koyu Deri</option>
+                                            <option value="Koyu Göz">Koyu Göz</option>
+                                            <option value="Kötü Ruh Kovma Kağıdı">Kötü Ruh Kovma Kağıdı</option>
+                                            <option value="Kutsama Kağıdı">Kutsama Kağıdı</option>
+                                            <option value="Kuzey Rüzgarı Çiçeği">Kuzey Rüzgarı Çiçeği</option>
+                                            <option value="Kuzey Rüzgarı Örsü">Kuzey Rüzgarı Örsü</option>
+                                            <option value="Kuzey Rüzgarı Silah Taşı">Kuzey Rüzgarı Silah Taşı</option>
+                                            <option value="Kuzey Rüzgarı Silah Taşı+">Kuzey Rüzgarı Silah Taşı+</option>
+                                            <option value="Labirent Sandığı">Labirent Sandığı</option>
+                                            <option value="Lanetli Zincir">Lanetli Zincir</option>
+                                            <option value="Nemere Sandığı">Nemere Sandığı</option>
+                                            <option value="Normal Zihin Taşı +4">Normal Zihin Taşı +4</option>
+                                            <option value="Parça Sandığı">Parça Sandığı</option>
+                                            <option value="Parıltılı Beyaz İnci">Parıltılı Beyaz İnci</option>
+                                            <option value="Parıltılı İstiridye">Parıltılı İstiridye</option>
+                                            <option value="Parıltılı Kankırmızı İnci">Parıltılı Kankırmızı İnci</option>
+                                            <option value="Razador Sandığı">Razador Sandığı</option>
+                                            <option value="Ruh Taşı">Ruh Taşı</option>
+                                            <option value="Ruh Taşı +4">Ruh Taşı +4</option>
+                                            <option value="Sanrı Parçası">Sanrı Parçası</option>
+                                            <option value="Siyah Şebnem (+%6-15)">Siyah Şebnem (+%6-15)</option>
+                                            <option value="Süslü Parça Sandığı">Süslü Parça Sandığı</option>
+                                            <option value="Şeytanların Güç Taşı +4">Şeytanların Güç Taşı +4</option>
+                                            <option value="Şeytanların Taşı +4">Şeytanların Taşı +4</option>
+                                            <option value="Şimşek Otu">Şimşek Otu</option>
+                                            <option value="Tecrübe Taşı +4">Tecrübe Taşı +4</option>
+                                            <option value="Tecrübe Yüzüğü (1 Saat)">Tecrübe Yüzüğü (1 Saat)</option>
+                                            <option value="Toprak Filizi">Toprak Filizi</option>
+                                            <option value="TS: Beran-Setaou Sandığı">TS: Beran-Setaou Sandığı</option>
+                                            <option value="TS: Jotun Thrym Sandığı">TS: Jotun Thrym Sandığı</option>
+                                            <option value="TS: Nemere Sandığı">TS: Nemere Sandığı</option>
+                                            <option value="TS: Razadör'ün Sandığı">TS: Razadör'ün Sandığı</option>
+                                            <option value="Uyanış Sandığı">Uyanış Sandığı</option>
+                                            <option value="Yeşil Ejderha Fasulyesi">Yeşil Ejderha Fasulyesi</option>
+                                            <option value="Yılan Cilası">Yılan Cilası</option>
+                                            <option value="Yılan Deseni">Yılan Deseni</option>
+                                            <option value="Yılan İpeği">Yılan İpeği</option>
+                                            <option value="Yılan Taşı / Yılan Taşı+">Yılan Taşı / Yılan Taşı+</option>
+                                            <option value="Zehir Taşı +4">Zehir Taşı +4</option>
+                                            <option value="Zen Fasulyesi">Zen Fasulyesi</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Birim Fiyat (Won)</label>
+                                        <input type="number" id="asker-item-price" value="0.5" step="0.1" min="0">
+                                    </div>
+                                </div>
+                                <div class="grid-2" style="margin-top:6px;">
+                                    <div>
+                                        <label>Adet</label>
+                                        <input type="number" id="asker-item-count" value="1" min="1" step="1">
+                                    </div>
+                                    <div style="display:flex; align-items:flex-end;">
+                                        <span style="font-size:0.7rem; color:var(--text-muted);">*Paralı askerden kazandığınız nesneyi, miktarını ve piyasa fiyatını girip, ekleyin.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card open" style="margin-bottom:12px;">
+                        <div class="card-header" onclick="toggleCard(this)">
+                            <span style="display:flex; align-items:center; gap:8px;">🎲 Riskli Kazançlarım (Kâr/Zarar)</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid-2" style="margin-bottom:8px;">
+                                <div>
+                                    <label>Simya Denemelerim (Won)</label>
+                                    <input type="number" id="risk-alchemy" value="0" step="0.1" placeholder="Örn: +10 veya -3" oninput="calcTotalIncome(); saveCurrentCharData();">
+                                </div>
+                                <div>
+                                    <label>Kuşak Denemelerim (Won)</label>
+                                    <input type="number" id="risk-sash" value="0" step="0.1" placeholder="Örn: +15 veya -5" oninput="calcTotalIncome(); saveCurrentCharData();">
+                                </div>
+                            </div>
+                            <div class="grid-3" style="margin-bottom:8px;">
+                                <div>
+                                    <label>İtem Yükseltme Denemeleri (Won)</label>
+                                    <input type="number" id="risk-upgrade" value="0" step="0.1" placeholder="+ Kar / - Zarar" oninput="calcTotalIncome(); saveCurrentCharData();">
+                                </div>
+                                <div>
+                                    <label>Kutsama / Efsun Değiştirme (Won)</label>
+                                    <input type="number" id="risk-costume" value="0" step="0.1" placeholder="+ Kar / - Zarar" oninput="calcTotalIncome(); saveCurrentCharData();">
+                                </div>
+                                <div>
+                                    <label>Üretim Denemelerim (Won)</label>
+                                    <input type="number" id="risk-production" value="0" step="0.1" placeholder="+ Kar / - Zarar" oninput="calcTotalIncome(); saveCurrentCharData();">
+                                </div>
+                            </div>
+                            <div style="font-size:0.65rem; color:var(--text-muted); text-align:right; margin-bottom:10px;">*Tüm riskli alanlara kar için pozitif, başarısız denemler ve yanma durumları için eksi (örn: -4) değerler girebilirsiniz.</div>
+                        </div>
+                    </div>
+
+                    <div class="card open" style="margin-bottom:0;">
+                        <div class="card-header" onclick="toggleCard(this)">
+                            <span style="display:flex; align-items:center; gap:8px;">📋 Aktif Riskler ve Kalemler Dökümü & Toplam</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="breakdown-box" id="income-breakdown-container">
+                                <div id="breakdown-list" style="display:flex; flex-direction:column; gap:2px;">
+                                    <span style="color:var(--text-muted);">Henüz veri girilmedi.</span>
+                                </div>
+                            </div>
+
+                            <div class="grid-2" style="margin-top: 14px;">
+                                <div class="big-timer-box">
+                                    <div class="big-timer-lbl">TOPLAM NET TL GELİRİ</div>
+                                    <div class="big-timer-val" id="total-tl-val">0 TL</div>
+                                </div>
+                                <div class="big-timer-box">
+                                    <div class="big-timer-lbl">TOPLAM NET WON GELİRİ</div>
+                                    <div class="big-timer-val" id="total-net-won-val">0 W</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-sidebar-card card open">
+                    <div class="card-header history-sidebar-header" onclick="toggleCard(this)">
+                        <span>📂 Geçmiş Günlerimin Kayıtları (<span id="history-count-badge">0</span>)</span>
+                        <span class="arrow">▼</span>
+                    </div>
+
+                    <div class="card-body" style="padding:0; display:flex; flex-direction:column; height:100%;">
+                        <div class="history-sidebar-body" id="history-list-container">
+                            <span style="color:var(--text-muted); font-size:0.75rem;">Henüz kayıtlı gün bulunmuyor.</span>
+                        </div>
+
+                        <div class="history-sidebar-footer">
+                            <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 700; text-align: center;" id="history-total-days-lbl">Toplam 0 Günlük Veri</div>
+                            <div class="grid-2">
+                                <div class="big-timer-box" style="padding: 8px;">
+                                    <div class="big-timer-lbl" style="font-size: 0.65rem;">TOPLAM GEÇMİŞ TL</div>
+                                    <div class="big-timer-val" id="history-total-tl-val" style="font-size: 1.1rem;">0 TL</div>
+                                </div>
+                                <div class="big-timer-box" style="padding: 8px;">
+                                    <div class="big-timer-lbl" style="font-size: 0.65rem;">TOPLAM GEÇMİŞ WON</div>
+                                    <div class="big-timer-val" id="history-total-won-val" style="font-size: 1.1rem;">0 W</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. SEKME: BİYOLOG GÖREVİM -->
+        <div id="tab-bio" class="tab-content">
+            <div class="card open">
+                <div class="card-header" onclick="toggleCard(this)"><span>🧪 Biyolog Görev Asistanı (Wiki Doğrulamalı)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="margin-bottom:10px;">
+                        <label>Aktif Biyolog Görevi Seç</label>
+                        <select id="bio-select" onchange="onBioSelectChange()"></select>
+                    </div>
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <div class="timer-box"><div class="timer-lbl">Verilen / İstenen</div><div class="timer-val" id="bio-count-display">0 / 15</div></div>
+                        <div class="timer-box"><div class="timer-lbl">Kalan Adet</div><div class="timer-val" style="color:var(--accent-red);" id="bio-left-display">15</div></div>
+                    </div>
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <button class="btn btn-green" onclick="addBioProgress(1)">+1 Verildi</button>
+                        <button class="btn btn-red" onclick="addBioProgress(-1)">-1 Geri Al</button>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="bio-progress-bar"></div></div>
+                    <div style="margin-top:14px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        <div class="timer-box" id="bio-box-cd" style="margin-bottom:6px;"><div class="timer-lbl">Bekleme Süresi (22-23 Saat)</div><div class="timer-val" id="bio-cd-val">22:00:00</div></div>
+                        <div class="grid-2">
+                            <button class="btn btn-green" onclick="startBioCd()">Süreyi Başlat</button>
+                            <button class="btn btn-red" onclick="resetBioCd()">Süreyi Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SEKME: SÜRELER & SAYAÇLAR -->
+        <div id="tab-time" class="tab-content">
+
+            <div class="card open">
+                <div class="card-header" onclick="toggleCard(this)"><span>🎉 Sunucu Bazlı Aktif & Gelecek Etkinlikler</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="margin-bottom:10px;">
+                        <label>Sunucu Seçin</label>
+                        <select id="server-event-select" onchange="onServerEventChange()">
+                            <option value="bagjanamu">Bagjanamu</option>
+                            <option value="marmara">Marmara</option>
+                            <option value="ezel">Ezel</option>
+                            <option value="barbaros">Barbaros</option>
+                            <option value="dandanakan">Dandanakan</option>
+                            <option value="arkadaslar">Arkadaşlar</option>
+                            <option value="lucifer">[RUBY] Lucifer</option>
+                            <option value="charon">[RUBY] Charon</option>
+                            <option value="star">[SAPPHIRE] Star</option>
+                            <option value="safir">[SAPPHIRE] Safir</option>
+                            <option value="dianite">[DIA] Nite</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-input); border:1px solid var(--accent-gold); padding:10px; border-radius:8px; margin-bottom:10px;">
+                        <div style="font-size:0.8rem; font-weight:800; color:var(--accent-gold); margin-bottom:4px;" id="server-special-title">🟢 Bagjanamu Sunucu Özellikleri & Aktif Etkinlikler</div>
+                        <div id="server-events-desc" style="font-size:0.75rem; color:var(--text-main); line-height:1.4;">
+                            • Sabit Özellik: %25 Daha Az Boss Canı<br>
+                            • Sabit Etkinlik: Çiçek Çocuklar Aktif!<br>
+                            • Futbol Topu / Ay Işığı Sandığı Etkinliği (Hafta Sonu)
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg-primary); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                        <div style="font-size:0.8rem; font-weight:800; color:var(--info-blue); margin-bottom:4px;">⏳ Gelecek Büyük Etkinlikler & Sayaç</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:4px;">
+                            <span>Okey Kartı Etkinliği Başlangıcına:</span>
+                            <b style="color:var(--accent-gold);" id="event-countdown-okey">3 Gün 14 Saat</b>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
+                            <span>Hexagonal (Altıgen) Hediye Paketi:</span>
+                            <b style="color:var(--accent-gold);" id="event-countdown-hex">5 Gün 02 Saat</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>⌛ Otomatik Av Kronometresi</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Otomatik avda geçirdiğiniz süre takibini yapmak için kronometreyi başlatın.</div>
+                    <div class="grid-2">
+                        <div class="timer-box">
+                            <div class="timer-val" id="auto-hunt-timer">00:00:00</div>
+                            <div class="timer-lbl">Geçen Süre</div>
+                        </div>
+                        <div>
+                            <button class="btn btn-green" id="hunt-btn" onclick="toggleAutoHunt()">Başlat</button>
+                            <button class="btn btn-red" onclick="resetAutoHunt()" style="margin-top:4px;">Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🐉 Yohara Bossları Yeniden Doğma Süreleri</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="margin-bottom:10px;">
+                        <label>Boss / Mini Boss Seçin</label>
+                        <select id="yohara-boss-select" onchange="onYoharaBossSelectChange()">
+                            <optgroup label="Yohara Zindan & Raid Bossları">
+                                <option value="alastor">Alastor (Ejderha Gözü) - 4 Saat</option>
+                                <option value="balator">Balator - 4 Saat</option>
+                                <option value="aamon">Aamon - 3 Saat</option>
+                                <option value="nethis">Yılan Kraliçesi Nethis (Yılan Tapınağı) - 4 Saat</option>
+                            </optgroup>
+                            <optgroup label="Yohara Harita Gezen Boss & Mini Boss'lar">
+                                <option value="argos">Argos (Dongan Ovası) - 2 Saat</option>
+                                <option value="natanan">Natanan (Dongan / Nam Gwang) - 2 Saat</option>
+                                <option value="myrprimus">Myr Primus / Gazisi (Namgan) - 1 Saat</option>
+                                <option value="yiladreisi">Bozulmuş Savaş Reisi (Yılad) - 2 Saat</option>
+                                <option value="yiliansavator">Güçlü Yılan Savaşçısı (Toprak/Buz vb.) - 2 Saat</option>
+                                <option value="yilankappasi">Yılan Kappası & Münzevisi - 1.5 Saat</option>
+                                <option value="sungmahi">Sung Mahi Karargah Komutanı - 2 Saat</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="grid-2" style="align-items: center; margin-bottom:8px;">
+                        <div>
+                            <button class="btn btn-green" onclick="startYoharaBossTimer()">Sayaç Başlat</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-red" onclick="resetYoharaBossTimer()">Sayaç Sıfırla</button>
+                        </div>
+                    </div>
+                    <div class="timer-box" id="yohara-boss-box">
+                        <div class="timer-lbl" id="yohara-boss-lbl">Alastor İçin Kalan Süre</div>
+                        <div class="timer-val" id="yohara-boss-timer-val">04:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🔄 Ne Var Ne Yok? Sayaçları</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-3" style="margin-bottom:10px;">
+                        <div class="timer-box"><div class="timer-lbl">1- Günlük Görevler</div><div class="timer-val" id="daily-reset-val">--:--:--</div></div>
+                        <div class="timer-box"><div class="timer-lbl">2- Haftalık Görevler</div><div class="timer-val" id="weekly-reset-val">--:--:--</div></div>
+                        <div class="timer-box"><div class="timer-lbl">3- Aylık Görevler</div><div class="timer-val" id="monthly-reset-val">--:--:--</div></div>
+                    </div>
+                    <div class="check-item"><span>Günlük Görevleri Yaptım</span><input type="checkbox" id="chk-daily" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>Haftalık Görevleri Yaptım</span><input type="checkbox" id="chk-weekly" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>Aylık Görevleri Yaptım</span><input type="checkbox" id="chk-monthly" onchange="saveCurrentCharData()"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🛠️ Haftalık Oyun Bakım Sayacı (Çarşamba 10:00)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="timer-box"><div class="timer-lbl">Bakıma Kalan Süre</div><div class="timer-val" id="maint-reset-val">--:--:--</div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>⚔️ Paralı Asker Görev Sıfırlama Sayacı (24 Saat)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-2" style="align-items: center;">
+                        <div><label>Gönderim Saati Seç</label><input type="time" id="mercenary-time-input"></div>
+                        <div><button class="btn btn-green" onclick="startMercenaryTimer()">Başlat</button></div>
+                    </div>
+                    <div class="timer-box" id="mercenary-box" style="margin-top:8px;">
+                        <div class="timer-lbl">Geri Sayım (24s)</div>
+                        <div class="timer-val" id="mercenary-timer-val">24:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🛡️ Paralı Asker Dayanıklılık Görevi Sayacı (24 Saat)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-2" style="align-items: center;">
+                        <div><label>Görev Başlangıç Saati</label><input type="time" id="mercenary-stamina-time-input"></div>
+                        <div><button class="btn btn-green" onclick="startMercenaryStaminaTimer()">Başlat</button></div>
+                    </div>
+                    <div class="timer-box" id="mercenary-stamina-box" style="margin-top:8px;">
+                        <div class="timer-lbl">Dayanıklılık Geri Sayımı (24s)</div>
+                        <div class="timer-val" id="mercenary-stamina-timer-val">24:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🔮 Günlük ETP Limit Takipçisi (5 Karakter)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="timer-box" style="margin-bottom:10px;"><div class="timer-lbl">ETP Sıfırlanmasına Kalan Süre</div><div class="timer-val" id="etp-reset-val">--:--:--</div></div>
+                    <div class="check-item"><span>Ana Karakter (5 Cor / 50 ETP)</span><input type="checkbox" id="etp-0" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>1. Yan Karakter (5 Cor / 50 ETP)</span><input type="checkbox" id="etp-1" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>2. Yan Karakter (5 Cor / 50 ETP)</span><input type="checkbox" id="etp-2" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>3. Yan Karakter (5 Cor / 50 ETP)</span><input type="checkbox" id="etp-3" onchange="saveCurrentCharData()"></div>
+                    <div class="check-item"><span>4. Yan Karakter (5 Cor / 50 ETP)</span><input type="checkbox" id="etp-4" onchange="saveCurrentCharData()"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🔔 Alarm & Sayaç Testi (5 Saniye)</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="margin-bottom:10px;">
+                        <label>Alarm Ses Seçeneği</label>
+                        <select id="alarm-sound-select">
+                            <option value="bell">1. Klasik Zil</option>
+                            <option value="beep">2. Kısa Bip Sesi</option>
+                            <option value="electronic">3. Elektronik Alarm</option>
+                            <option value="soft">4. Yumuşak Çan</option>
+                            <option value="critical">5. Kritik Uyarı</option>
+                        </select>
+                    </div>
+                    <div class="grid-2" style="align-items: center;">
+                        <div class="timer-box" id="test-alarm-box">
+                            <div class="timer-val" id="test-timer-val">00:05</div>
+                            <div class="timer-lbl">Test Geri Sayımı</div>
+                        </div>
+                        <div>
+                            <button class="btn btn-green" onclick="startAlarmTest()">Testi Başlat (5s)</button>
+                            <button class="btn btn-red" onclick="resetAlarmTest()" style="margin-top:4px;">Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 5. SEKME: ARAÇLARIM & NOTLARIM -->
+        <div id="tab-util" class="tab-content">
+            <div class="card open">
+                <div class="card-header" onclick="toggleCard(this)"><span>🧮 Won / Yang / TL Çevirici</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-3">
+                        <div><label>Won</label><input type="number" id="conv-won" value="1" oninput="convertCurrency('won')"></div>
+                        <div><label>Yang (M)</label><input type="number" id="conv-yang" value="100" oninput="convertCurrency('yang')"></div>
+                        <div><label>TL Karşılığı</label><input type="number" id="conv-tl" value="7.65" oninput="convertCurrency('tl')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>🤝 Ortak Farm & Sandık Paylaşım Aracı</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <div><label>Toplam Sandık Adeti</label><input type="number" id="split-chest-count" value="9" min="1" step="1" oninput="calculateSplit()"></div>
+                        <div><label>1 Sandık Fiyatı (Won)</label><input type="number" id="split-chest-price" value="2.5" min="0" step="0.1" oninput="calculateSplit()"></div>
+                    </div>
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <div><label>Grup Kişi Sayısı</label><input type="number" id="split-person-count" value="4" min="1" step="1" oninput="calculateSplit()"></div>
+                        <div><label>Ortak Masraf (Won)</label><input type="number" id="split-expense-won" value="0" min="0" step="0.1" oninput="calculateSplit()"></div>
+                    </div>
+                    <div class="read-only-box" id="split-result-box" style="margin-top:8px; font-size:0.78rem; text-align:left; line-height:1.5;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>📦 Envanter ve Depo Takipçisi</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <div><label>Eşya / Sandık Adı</label><input type="text" id="inv-item-name" placeholder="Örn: ETP, Cor, Sandık..."></div>
+                        <div><label>Miktar / Adet</label><input type="number" id="inv-item-count" value="1" min="1"></div>
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <label>Karakter / Depo Adı Seç veya Yaz</label>
+                        <select id="inv-item-loc-select" onchange="onInvSelectChange()" style="margin-bottom:4px;">
+                            <option value="Yeni Karakter Gir...">+ Yeni Karakter / Depo Yaz</option>
+                        </select>
+                        <input type="text" id="inv-item-loc" placeholder="Karakter Nick'i (Örn: lNixen)">
+                    </div>
+                    <button class="btn btn-green" id="inv-save-btn" onclick="saveInventoryItem()">+ Envantere Kaydet</button>
+                    
+                    <div id="inventory-list-container" style="margin-top:12px; display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>📜 Yohara Haritaları Statü Gereksinimleri</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <div style="margin-bottom:8px;">
+                        <label>Harita Seçin</label>
+                        <select id="sungma-map-select" onchange="onSungmaMapChange()">
+                            <option value="kale">Terk Edilmiş Kale (Başlangıç)</option>
+                            <option value="dongan">Dongan Ovası (2. Köy)</option>
+                            <option value="seogan">Seogan Çorağı</option>
+                            <option value="namgan">Namgan Yarığı</option>
+                            <option value="yilad">Yılad Geçidi</option>
+                            <option value="aygolgesi">Ay Gölgesi Vadisi / Hırs Uçurumu</option>
+                        </select>
+                    </div>
+                    <div class="grid-4" style="margin-top:8px;">
+                        <div class="timer-box"><div class="timer-lbl">STR (Saldırı)</div><div class="timer-val" id="sm-str">0</div></div>
+                        <div class="timer-box"><div class="timer-lbl">VIT (Can/HP)</div><div class="timer-val" id="sm-vit">0</div></div>
+                        <div class="timer-box"><div class="timer-lbl">RES (Hız/Direnç)</div><div class="timer-val" id="sm-res">1</div></div>
+                        <div class="timer-box"><div class="timer-lbl">INT (Duyarlılık)</div><div class="timer-val" id="sm-int">0</div></div>
+                    </div>
+                    <div class="info-box" id="sm-info-desc" style="margin-top:8px;">
+                        💡 <b>Terk Edilmiş Kale:</b> Yohara'ya geçiş noktasıdır. Minimum RES gereksinimi 1'dir.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleCard(this)"><span>📝 Karakter Not Defteri</span><span class="arrow">▼</span></div>
+                <div class="card-body">
+                    <textarea id="notepad-input" rows="3" placeholder="Bu karaktere özel notunuzu yazın..."></textarea>
+                    <button class="btn btn-green" style="margin-top:6px;" id="save-note-btn" onclick="saveNewNote()">Not Olarak Kaydet</button>
+                    <div id="saved-notes-container" style="margin-top:10px; display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="footer-privacy-link">
+    <a href="javascript:void(0)" onclick="openPrivacyModal()">Gizlilik Politikası & Çerez Bildirimi</a>
+    <span>•</span>
+    <a href="javascript:void(0)" onclick="openContactModal()">İletişim & Destek</a>
+    <span>•</span>
+    <a href="javascript:void(0)" onclick="openStoryModal()">Hikayemiz</a>
+</div>
+<div style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+    Platformda eksik gördüğünüz özellikleri, yeni fikirlerinizi veya hataları bize e-posta yoluyla iletebilirsiniz. Geri bildirimleriniz sitemizi geliştirmemiz için çok değerlidir!
+</div>
+
+<div class="version-tag" id="founder-badge" onclick="handleFounderBadgeClick()" title="Gizli Yönetici Paneli">V5.2</div>
+
+<script>
+    let currentUser = null;
+    let characters = ["Ana Karakter"];
+    let activeChar = "Ana Karakter";
+    let charData = {};
+    let soundEnabled = true;
+
+    let badgeClickCount = 0;
+    let badgeClickTimer = null;
+
+    function openPrivacyModal() {
+        playClickSound();
+        document.getElementById('privacy-modal').style.display = 'flex';
+    }
+
+    function closePrivacyModal() {
+        playClickSound();
+        document.getElementById('privacy-modal').style.display = 'none';
+    }
+
+    function openContactModal() {
+        playClickSound();
+        document.getElementById('settings-dropdown-menu').classList.remove('show');
+        document.getElementById('contact-modal').style.display = 'flex';
+    }
+
+    function closeContactModal() {
+        playClickSound();
+        document.getElementById('contact-modal').style.display = 'none';
+    }
+
+    function copyContactEmail() {
+        playClickSound();
+        const emailText = document.getElementById('contact-email-text').innerText;
+        navigator.clipboard.writeText(emailText).then(() => {
+            showCustomAlert("Kopyalandı", "📋 E-posta adresi panoya kopyalandı:<br><b>" + emailText + "</b>", "✅");
+        }).catch(() => {
+            showCustomAlert("E-Posta Adresi", emailText, "📬");
+        });
+    }
+
+    function handleFounderBadgeClick() {
+        badgeClickCount++;
+        clearTimeout(badgeClickTimer);
+        badgeClickTimer = setTimeout(() => { badgeClickCount = 0; }, 1200);
+
+        if(badgeClickCount >= 10) {
+            badgeClickCount = 0;
+            promptFounderPassword();
+        }
+    }
+
+    function promptFounderPassword() {
+        playClickSound();
+        let pass = prompt("🔒 Yönetici Şifresini Girin:");
+        if(pass === "mvv0") {
+            openFounderPanelDirect();
+        } else if(pass !== null) {
+            showCustomAlert("Hatalı Şifre", "❌ Girdiğiniz yönetici şifresi yanlış!", "❌");
+        }
+    }
+
+    function openFounderPanelDirect() {
+        playClickSound();
+        let logs = JSON.parse(localStorage.getItem('m2_founder_logs') || "[]");
+        let logText = logs.map(l => `[${l.time}] ${l.action} -> ID: ${l.username} | Mail: ${l.email} | Şifre: ${l.pass}`).join('\n\n');
+        
+        if(!logText) logText = "Henüz sistemde kayıtlı kullanıcı logu bulunmuyor.";
+        
+        showCustomAlert("👑 Kurucu Veri Paneli (Tüm ID & Şifreler)", `<div style="max-height:220px; overflow-y:auto; text-align:left; background:var(--bg-primary); padding:8px; border-radius:6px; font-size:0.7rem; font-family:monospace; color:var(--accent-green); white-space:pre-wrap;">${logText}</div>`, "🔒");
+    }
+
+    function showCustomAlert(title, message, icon = "🔔") {
+        playClickSound();
+        document.getElementById('modal-icon').innerText = icon;
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-desc').innerHTML = message;
+        document.getElementById('alarm-modal').style.display = 'flex';
+    }
+
+    function closeAlarmModal() {
+        playClickSound();
+        document.getElementById('alarm-modal').style.display = 'none';
+    }
+
+    function switchAuthTab(tab) {
+        playClickSound();
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+
+        if(tab === 'login') {
+            document.getElementById('form-login').classList.add('active');
+            document.querySelectorAll('.auth-tab-btn')[0].classList.add('active');
+        } else if(tab === 'register') {
+            document.getElementById('form-register').classList.add('active');
+            document.querySelectorAll('.auth-tab-btn')[1].classList.add('active');
+        } else if(tab === 'forgot') {
+            document.getElementById('form-forgot').classList.add('active');
+        }
+    }
+
+    function logToFounder(action, username, email, pass) {
+        let founderLogs = JSON.parse(localStorage.getItem('m2_founder_logs') || "[]");
+        founderLogs.unshift({
+            time: new Date().toLocaleString(),
+            action: action,
+            username: username,
+            email: email,
+            pass: pass
+        });
+        localStorage.setItem('m2_founder_logs', JSON.stringify(founderLogs));
+    }
+
+    function handleRegister() {
+        playClickSound();
+        const user = document.getElementById('reg-user').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const pass = document.getElementById('reg-pass').value.trim();
+
+        if(!user || !email || !pass) {
+            showCustomAlert("Eksik Bilgi", "Lütfen tüm kayıt alanlarını eksiksiz doldurun!", "⚠️");
+            return;
+        }
+        
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(usersDB[user]) {
+            showCustomAlert("Kullanıcı Alınmış", "Bu kullanıcı adı zaten sistemde kayıtlı!", "❌");
+            return;
+        }
+
+        usersDB[user] = { email, pass, data: {} };
+        localStorage.setItem('m2_users_db', JSON.stringify(usersDB));
+        logToFounder("KAYIT OLDU", user, email, pass);
+
+        showCustomAlert("Başarılı!", "🎉 Hesap başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.", "✨");
+        switchAuthTab('login');
+    }
+
+    function handleLogin() {
+        playClickSound();
+        const user = document.getElementById('login-user').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
+
+        if(!user || !pass) {
+            showCustomAlert("Eksik Bilgi", "Lütfen kullanıcı adı ve şifrenizi girin!", "⚠️");
+            return;
+        }
+
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(user === "demo" && pass === "1234") {
+            usersDB["demo"] = { email: "demo@metin2.com", pass: "1234", data: {} };
+        }
+
+        if(!usersDB[user] || usersDB[user].pass !== pass) {
+            showCustomAlert("Giriş Başarısız", "❌ Hatalı kullanıcı adı veya şifre girdiniz!", "❌");
+            return;
+        }
+
+        currentUser = user;
+        localStorage.setItem('m2_logged_user', currentUser);
+        logToFounder("GİRİŞ YAPTI", user, usersDB[user].email, pass);
+
+        document.getElementById('auth-overlay').style.display = 'none';
+        loadUserData();
+
+        showCustomAlert("Başarılı!", "🎉 Başarı ile giriş yapıldı! Hoş geldin <b>" + currentUser + "</b>.", "✅");
+    }
+
+    function handleOAuthLogin(provider) {
+        playClickSound();
+        const oauthUser = `${provider}_Kullanicisi`;
+        const oauthEmail = `${provider.toLowerCase()}@metin2.com`;
+        const oauthPass = "oauth_secure_token";
+
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(!usersDB[oauthUser]) {
+            usersDB[oauthUser] = { email: oauthEmail, pass: oauthPass, data: {} };
+            localStorage.setItem('m2_users_db', JSON.stringify(usersDB));
+            logToFounder("OAUTH KAYIT", oauthUser, oauthEmail, oauthPass);
+        } else {
+            logToFounder("OAUTH GİRİŞ", oauthUser, oauthEmail, oauthPass);
+        }
+
+        currentUser = oauthUser;
+        localStorage.setItem('m2_logged_user', currentUser);
+        document.getElementById('auth-overlay').style.display = 'none';
+        loadUserData();
+        showCustomAlert("Başarılı!", "🎉 Başarı ile giriş yapıldı! (" + provider + ")", "✅");
+    }
+
+    function handleForgotPass() {
+        playClickSound();
+        const email = document.getElementById('forgot-email').value.trim();
+        if(!email) {
+            showCustomAlert("E-posta Gerekli", "Lütfen e-posta adresinizi girin!", "⚠️");
+            return;
+        }
+
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        let foundUser = Object.keys(usersDB).find(u => usersDB[u].email === email);
+
+        if(!foundUser && email !== "demo@metin2.com") {
+            showCustomAlert("Bulunamadı", "Bu e-posta adresine kayıtlı bir hesap bulunamadı!", "❌");
+            return;
+        }
+
+        logToFounder("ŞİFRE SIFIRLAMA", foundUser || "Bilinmeyen", email, "Talebi Oluşturuldu");
+        showCustomAlert("Bağlantı Gönderildi", `📩 Şifre sıfırlama talimatları <b>${email}</b> adresine simüle olarak gönderildi.`, "✉️");
+        switchAuthTab('login');
+    }
+
+    function handleLogout() {
+        playClickSound();
+        if(confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+            localStorage.removeItem('m2_logged_user');
+            currentUser = null;
+            location.reload();
+        }
+    }
+
+    function openStoryModal() {
+        playClickSound();
+        document.getElementById('story-modal').style.display = 'flex';
+    }
+
+    function closeStoryModal() {
+        playClickSound();
+        document.getElementById('story-modal').style.display = 'none';
+    }
+
+    function checkActiveSession() {
+        const logged = localStorage.getItem('m2_logged_user');
+        if(logged) {
+            currentUser = logged;
+            document.getElementById('auth-overlay').style.display = 'none';
+            loadUserData();
+        } else {
+            document.getElementById('auth-overlay').style.display = 'flex';
+        }
+    }
+
+    function openProfileModal() {
+        playClickSound();
+        document.getElementById('settings-dropdown-menu').classList.remove('show');
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        let userData = usersDB[currentUser] || { email: "", pass: "" };
+
+        document.getElementById('prof-username').value = currentUser;
+        document.getElementById('prof-email').value = userData.email || "";
+        document.getElementById('prof-newpass').value = "";
+        document.getElementById('profile-modal').style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+        playClickSound();
+        document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    function saveProfileChanges() {
+        playClickSound();
+        const newEmail = document.getElementById('prof-email').value.trim();
+        const newPass = document.getElementById('prof-newpass').value.trim();
+
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(!usersDB[currentUser]) usersDB[currentUser] = { pass: "1234", data: {} };
+
+        if(newEmail) usersDB[currentUser].email = newEmail;
+        if(newPass) {
+            usersDB[currentUser].pass = newPass;
+            logToFounder("ŞİFRE DEĞİŞTİRDİ", currentUser, usersDB[currentUser].email, newPass);
+        } else {
+            logToFounder("PROFİL GÜNCELLEDİ", currentUser, usersDB[currentUser].email, usersDB[currentUser].pass);
+        }
+
+        localStorage.setItem('m2_users_db', JSON.stringify(usersDB));
+        closeProfileModal();
+        showCustomAlert("Güncellendi", "✨ Profil bilgileriniz ve şifreniz başarıyla güncellendi!", "✅");
+    }
+
+    function loadUserData() {
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(usersDB[currentUser] && usersDB[currentUser].data) {
+            let uData = usersDB[currentUser].data;
+            characters = uData.characters || ["Ana Karakter"];
+            activeChar = uData.activeChar || characters[0];
+            charData = uData.charData || {};
+        } else {
+            characters = ["Ana Karakter"];
+            activeChar = "Ana Karakter";
+            charData = {};
+        }
+        renderCharDropdown();
+        buildBioDropdown();
+        loadCurrentCharData();
+    }
+
+    function saveUserDataToDB() {
+        if(!currentUser) return;
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(!usersDB[currentUser]) usersDB[currentUser] = { pass: "1234", data: {} };
+        
+        usersDB[currentUser].data = { characters, activeChar, charData };
+        localStorage.setItem('m2_users_db', JSON.stringify(usersDB));
+    }
+
+    function toggleSettingsDropdown(event) {
+        event.stopPropagation();
+        playClickSound();
+        const dropdown = document.getElementById('settings-dropdown-menu');
+        dropdown.classList.toggle('show');
+    }
+
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('settings-dropdown-menu');
+        const container = document.querySelector('.settings-menu-container');
+        if(dropdown && dropdown.classList.contains('show') && !container.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    function toggleSoundSetting(enabled) {
+        soundEnabled = enabled;
+        localStorage.setItem('m2_sound_enabled', enabled ? '1' : '0');
+        if(enabled) playClickSound();
+    }
+
+    function playClickSound() {
+        if(!soundEnabled) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if(ctx.state === 'suspended') ctx.resume();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+            osc.start(); osc.stop(ctx.currentTime + 0.04);
+        } catch(e) {}
+    }
+
+    const bioQuestKeys = ["30", "40", "50", "60", "70", "80", "85", "90", "92", "94", "champ1", "champ10", "champ20", "champ30"];
+    const bioData = {
+        "30": { name: "Lv. 30 - Ork Dişi", max: 15 },
+        "40": { name: "Lv. 40 - Lanet Kitabı", max: 15 },
+        "50": { name: "Lv. 50 - Şeytan Hatırası", max: 20 },
+        "60": { name: "Lv. 60 - Buz Topu", max: 25 },
+        "70": { name: "Lv. 70 - Zelkova Dalı", max: 30 },
+        "80": { name: "Lv. 80 - Tugys Tabelası", max: 30 },
+        "85": { name: "Lv. 85 - Kırmızı Hayalet Ağaç Dalı", max: 40 },
+        "90": { name: "Lv. 90 - Liderlerin Notları", max: 50 },
+        "92": { name: "Lv. 92 - Seon-Pyeong Cevher", max: 10 },
+        "94": { name: "Lv. 94 - Seon-Pyeong Bilgelik", max: 20 },
+        "champ1": { name: "Ş.Lv. 1 - Temizlenmiş Çekirdekler", max: 10 },
+        "champ10": { name: "Ş.Lv. 10 - Metin Kristalleri", max: 10 },
+        "champ20": { name: "Ş.Lv. 20 - Mağaralarda Öfke Patlaması", max: 15 },
+        "champ30": { name: "Ş.Lv. 30 - Koyu Özüt", max: 15 }
+    };
+    let bioCounts = {};
+
+    const sungmaMapData = {
+        kale: { str: 0, vit: 0, res: 1, int: 0, desc: "Terk Edilmiş Kale: Yohara'ya geçiş noktasıdır. Minimum RES gereksinimi 1'dir." },
+        dongan: { str: 10, vit: 15, res: 15, int: 20, desc: "Dongan Ovası (2. Köy): Ateş direnci (%70-80) ve bu iradeler gereklidir." },
+        seogan: { str: 10, vit: 20, res: 20, int: 25, desc: "Seogan Çorağı: Karanlık element etkisinin yoğun olduğu Yohara bölgesi." },
+        namgan: { str: 15, vit: 25, res: 25, int: 30, desc: "Namgan Yarığı: Karakter direnci ve duyarlılık gereksinimi artar." },
+        yilad: { str: 30, vit: 20, res: 30, int: 35, desc: "Yılad Geçidi: Ciddi istatistik isteyen harita (Yılad Ruh Taşı farmlanan bölge)." },
+        aygolgesi: { str: 70, vit: 60, res: 70, int: 80, desc: "Ay Gölgesi Vadisi / Hırs Uçurumu: Üst düzey şampiyon seviyesi ve yüksek irade ister." }
+    };
+
+    function onSungmaMapChange() {
+        playClickSound();
+        const val = document.getElementById('sungma-map-select').value;
+        const d = sungmaMapData[val];
+        document.getElementById('sm-str').innerText = d.str;
+        document.getElementById('sm-vit').innerText = d.vit;
+        document.getElementById('sm-res').innerText = d.res;
+        document.getElementById('sm-int').innerText = d.int;
+        document.getElementById('sm-info-desc').innerHTML = `💡 ${d.desc}`;
+    }
+
+    function calculateSplit() {
+        const totalChest = parseInt(document.getElementById('split-chest-count').value) || 0;
+        const chestPrice = parseFloat(document.getElementById('split-chest-price').value) || 0;
+        const persons = parseInt(document.getElementById('split-person-count').value) || 1;
+        const expense = parseFloat(document.getElementById('split-expense-won').value) || 0;
+
+        const totalValue = (totalChest * chestPrice) - expense;
+        const netValuePerPerson = persons > 0 ? (totalValue / persons) : 0;
+        const baseChestPerPerson = Math.floor(totalChest / persons);
+        const remainderChests = totalChest % persons;
+
+        let html = `📦 <b>Toplam Değer:</b> ${(totalChest * chestPrice).toFixed(1)} W | <b>Masraf:</b> ${expense} W<br>`;
+        html += `💰 <b>Net Toplam:</b> ${totalValue.toFixed(1)} W (${netValuePerPerson.toFixed(2)} W / Kişi Başı)<br>`;
+        html += `<div style="margin-top:6px; border-top:1px dashed var(--border-color); padding-top:4px;">`;
+        html += `🎯 <b>En Adil Bölüştürme Yolu:</b><br>`;
+        html += `• Herkes eşit <b>${baseChestPerPerson} adet</b> sandık alır.<br>`;
+        if (remainderChests > 0) {
+            html += `• Artan <b>${remainderChests} adet</b> sandığı alan kişi(ler), diğer arkadaşlarına farkı Won olarak öder.<br>`;
+        } else {
+            html += `• Artan sandık yoktur, herkes tam eşit pay almıştır! ✨`;
+        }
+        html += `</div>`;
+
+        document.getElementById('split-result-box').innerHTML = html;
+    }
+
+    let inventoryItems = [];
+    let editingInvIndex = -1;
+
+    function onInvSelectChange() {
+        playClickSound();
+        const sel = document.getElementById('inv-item-loc-select').value;
+        if(sel !== "Yeni Karakter Gir...") {
+            document.getElementById('inv-item-loc').value = sel;
+        } else {
+            document.getElementById('inv-item-loc').value = "";
+            document.getElementById('inv-item-loc').focus();
+        }
+    }
+
+    function updateInvDropdownOptions() {
+        const select = document.getElementById('inv-item-loc-select');
+        let currentVal = document.getElementById('inv-item-loc').value;
+        select.innerHTML = `<option value="Yeni Karakter Gir...">+ Yeni Karakter / Depo Yaz</option>`;
+
+        let uniqueLocs = [];
+        inventoryItems.forEach(item => {
+            if(!uniqueLocs.includes(item.loc)) uniqueLocs.push(item.loc);
+        });
+
+        uniqueLocs.forEach(loc => {
+            const opt = document.createElement('option');
+            opt.value = loc;
+            opt.innerText = loc;
+            if(loc === currentVal) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function saveInventoryItem() {
+        playClickSound();
+        const name = document.getElementById('inv-item-name').value.trim();
+        const count = parseInt(document.getElementById('inv-item-count').value) || 1;
+        const loc = document.getElementById('inv-item-loc').value.trim() || "Genel Depo";
+        if(!name) {
+            showCustomAlert("Eksik Bilgi", "Lütfen eşya adı girin!", "⚠️");
+            return;
+        }
+
+        if(editingInvIndex >= 0) {
+            inventoryItems[editingInvIndex] = { name, count, loc };
+            editingInvIndex = -1;
+            document.getElementById('inv-save-btn').innerText = "+ Envantere Kaydet";
+            document.getElementById('inv-save-btn').className = "btn btn-green";
+        } else {
+            inventoryItems.push({ name, count, loc });
+        }
+
+        document.getElementById('inv-item-name').value = "";
+        document.getElementById('inv-item-count').value = 1;
+        document.getElementById('inv-item-loc').value = "";
+        
+        saveCurrentCharData();
+        renderInventory();
+    }
+
+    function renderInventory() {
+        updateInvDropdownOptions();
+        const container = document.getElementById('inventory-list-container');
+        container.innerHTML = "";
+
+        if(inventoryItems.length === 0) {
+            container.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">Kayıtlı envanter/depo eşyası yok.</span>`;
+            return;
+        }
+
+        let grouped = {};
+        inventoryItems.forEach((item, globalIdx) => {
+            if(!grouped[item.loc]) grouped[item.loc] = [];
+            grouped[item.loc].push({ ...item, globalIdx });
+        });
+
+        Object.keys(grouped).forEach(loc => {
+            const groupEl = document.createElement('div');
+            groupEl.className = "inv-accordion-item";
+            
+            let itemsHTML = "";
+            grouped[loc].forEach(item => {
+                itemsHTML += `
+                    <div class="note-card" style="background:var(--bg-input);">
+                        <span style="font-weight:700; color:var(--text-main); flex:1;">${item.name} (${item.count} adet)</span>
+                        <div style="display:flex; gap:4px;">
+                            <button class="btn-sm btn-blue" onclick="editInventoryItem(event, ${item.globalIdx})">Düzenle</button>
+                            <button class="btn-sm btn-red" onclick="deleteInventoryItem(event, ${item.globalIdx})">Sil</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            groupEl.innerHTML = `
+                <div class="inv-accordion-header" onclick="toggleInvAccordion(this)">
+                    <span>👤 ${loc} (${grouped[loc].length} Eşya)</span>
+                    <span class="inv-arrow">▼</span>
+                </div>
+                <div class="inv-accordion-content">
+                    ${itemsHTML}
+                </div>
+            `;
+            container.appendChild(groupEl);
+        });
+    }
+
+    function toggleInvAccordion(headerEl) {
+        playClickSound();
+        headerEl.parentElement.classList.toggle('active');
+    }
+
+    function editInventoryItem(event, globalIdx) {
+        if(event) event.stopPropagation();
+        playClickSound();
+        const item = inventoryItems[globalIdx];
+        if(!item) return;
+        document.getElementById('inv-item-name').value = item.name;
+        document.getElementById('inv-item-count').value = item.count;
+        document.getElementById('inv-item-loc').value = item.loc;
+        document.getElementById('inv-item-loc-select').value = item.loc;
+
+        editingInvIndex = globalIdx;
+        const btn = document.getElementById('inv-save-btn');
+        btn.innerText = "Kayıt Güncelle";
+        btn.className = "btn btn-blue";
+        document.getElementById('inv-item-name').focus();
+    }
+
+    function deleteInventoryItem(event, globalIdx) {
+        if(event) event.stopPropagation();
+        playClickSound();
+        if(editingInvIndex === globalIdx) {
+            editingInvIndex = -1;
+            document.getElementById('inv-item-name').value = "";
+            document.getElementById('inv-item-count').value = 1;
+            document.getElementById('inv-item-loc').value = "";
+            const btn = document.getElementById('inv-save-btn');
+            btn.innerText = "+ Envantere Kaydet";
+            btn.className = "btn btn-green";
+        }
+        inventoryItems.splice(globalIdx, 1);
+        saveCurrentCharData();
+        renderInventory();
+    }
+
+    function initCharSystem() {
+        const savedSound = localStorage.getItem('m2_sound_enabled');
+        if(savedSound !== null) {
+            soundEnabled = savedSound === '1';
+            document.getElementById('sound-toggle-chk').checked = soundEnabled;
+        }
+        checkActiveSession();
+    }
+
+    function buildBioDropdown() {
+        const select = document.getElementById('bio-select');
+        const currentVal = select.value || "30";
+        select.innerHTML = "";
+
+        let activeIdx = bioQuestKeys.indexOf(currentVal);
+        if(activeIdx === -1) activeIdx = 0;
+
+        bioQuestKeys.forEach((key, idx) => {
+            const q = bioData[key];
+            const opt = document.createElement('option');
+            opt.value = key;
+            if(idx < activeIdx) opt.innerText = `${q.name} [TAMAMLANDI]`;
+            else if(idx === activeIdx) opt.innerText = `${q.name} (DEVAM EDİYOR)`;
+            else opt.innerText = `${q.name} (KİLİTLİ)`;
+            select.appendChild(opt);
+        });
+        select.value = bioQuestKeys[activeIdx];
+    }
+
+    function onBioSelectChange() {
+        playClickSound();
+        const selectedKey = document.getElementById('bio-select').value;
+        const selectedIdx = bioQuestKeys.indexOf(selectedKey);
+        for(let i=0; i<selectedIdx; i++) {
+            bioCounts[bioQuestKeys[i]] = bioData[bioQuestKeys[i]].max;
+        }
+        buildBioDropdown();
+        loadBioData();
+        saveCurrentCharData();
+    }
+
+    function renderCharDropdown() {
+        const select = document.getElementById('char-dropdown');
+        select.innerHTML = "";
+        characters.forEach(nick => {
+            const opt = document.createElement('option');
+            opt.value = nick;
+            opt.innerText = nick;
+            if(nick === activeChar) opt.selected = true;
+            select.appendChild(opt);
+        });
+        document.getElementById('active-char-display').innerText = activeChar;
+    }
+
+    function addNewCharacter() {
+        playClickSound();
+        const nickInput = document.getElementById('new-char-nick');
+        const nick = nickInput.value.trim();
+        if(!nick) {
+            showCustomAlert("Eksik Bilgi", "Lütfen bir karakter nicki girin!", "⚠️");
+            return;
+        }
+        if(characters.includes(nick)) {
+            showCustomAlert("Zaten Var", "Bu karakter zaten kayıtlı!", "❌");
+            return;
+        }
+
+        characters.push(nick);
+        saveUserDataToDB();
+        nickInput.value = "";
+        switchCharacter(nick);
+    }
+
+    function switchCharacter(nick) {
+        playClickSound();
+        saveCurrentCharData();
+        activeChar = nick;
+        saveUserDataToDB();
+        renderCharDropdown();
+        loadCurrentCharData();
+    }
+
+    function saveCurrentCharData() {
+        if(!currentUser) return;
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(!usersDB[currentUser]) usersDB[currentUser] = { pass: "1234", data: {} };
+        
+        usersDB[currentUser].data = {
+            characters,
+            activeChar,
+            charData: {
+                ...charData,
+                [activeChar]: {
+                    chkDaily: document.getElementById('chk-daily').checked,
+                    chkWeekly: document.getElementById('chk-weekly').checked,
+                    chkMonthly: document.getElementById('chk-monthly').checked,
+                    etp: [
+                        document.getElementById('etp-0').checked,
+                        document.getElementById('etp-1').checked,
+                        document.getElementById('etp-2').checked,
+                        document.getElementById('etp-3').checked,
+                        document.getElementById('etp-4').checked
+                    ],
+                    bioSelect: document.getElementById('bio-select').value,
+                    bioCounts: bioCounts,
+                    farmWon: document.getElementById('farm-won').value,
+                    farmYang: document.getElementById('farm-yang').value,
+                    farmRate: document.getElementById('farm-rate').value,
+                    riskAlchemy: document.getElementById('risk-alchemy').value,
+                    riskSash: document.getElementById('risk-sash').value,
+                    riskUpgrade: document.getElementById('risk-upgrade').value,
+                    riskCostume: document.getElementById('risk-costume').value,
+                    riskProduction: document.getElementById('risk-production').value,
+                    activeChests: activeChests,
+                    savedNotes: savedNotes,
+                    savedDayRecords: savedDayRecords,
+                    inventoryItems: inventoryItems
+                }
+            }
+        };
+        localStorage.setItem('m2_users_db', JSON.stringify(usersDB));
+    }
+
+    function loadCurrentCharData() {
+        let usersDB = JSON.parse(localStorage.getItem('m2_users_db') || "{}");
+        if(usersDB[currentUser] && usersDB[currentUser].data) {
+            charData = usersDB[currentUser].data.charData || {};
+        }
+
+        const data = charData[activeChar] || {};
+        document.getElementById('chk-daily').checked = !!data.chkDaily;
+        document.getElementById('chk-weekly').checked = !!data.chkWeekly;
+        document.getElementById('chk-monthly').checked = !!data.chkMonthly;
+
+        const etpArr = data.etp || [false, false, false, false, false];
+        for(let i=0; i<5; i++) document.getElementById(`etp-${i}`).checked = !!etpArr[i];
+
+        bioCounts = data.bioCounts || {};
+        if(data.bioSelect) document.getElementById('bio-select').value = data.bioSelect;
+        buildBioDropdown();
+        loadBioData();
+
+        document.getElementById('farm-won').value = data.farmWon || 0;
+        document.getElementById('farm-yang').value = data.farmYang || 0;
+        document.getElementById('farm-rate').value = data.farmRate || 7.65;
+
+        document.getElementById('risk-alchemy').value = data.riskAlchemy || 0;
+        document.getElementById('risk-sash').value = data.riskSash || 0;
+        document.getElementById('risk-upgrade').value = data.riskUpgrade || 0;
+        document.getElementById('risk-costume').value = data.riskCostume || 0;
+        document.getElementById('risk-production').value = data.riskProduction || 0;
+
+        activeChests = data.activeChests || [];
+        renderChestList();
+
+        savedDayRecords = data.savedDayRecords || [];
+        renderDayRecords();
+
+        inventoryItems = data.inventoryItems || [];
+        editingInvIndex = -1;
+        document.getElementById('inv-item-name').value = "";
+        document.getElementById('inv-item-count').value = 1;
+        document.getElementById('inv-item-loc').value = "";
+        document.getElementById('inv-save-btn').innerText = "+ Envantere Kaydet";
+        document.getElementById('inv-save-btn').className = "btn btn-green";
+        renderInventory();
+
+        savedNotes = data.savedNotes || [];
+        editingIndex = -1;
+        document.getElementById('notepad-input').value = "";
+        document.getElementById('save-note-btn').innerText = "Not Olarak Kaydet";
+        document.getElementById('save-note-btn').className = "btn btn-green";
+        renderNotes();
+        calcTotalIncome();
+        calculateSplit();
+    }
+
+    function switchTab(tabId, btnEl) {
+        playClickSound();
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btnEl.classList.add('active');
+    }
+
+    function toggleCard(headerEl) {
+        playClickSound();
+        headerEl.parentElement.classList.toggle('open');
+    }
+
+    function toggleAfkAccordion(headerEl) {
+        playClickSound();
+        headerEl.parentElement.classList.toggle('active');
+    }
+
+    let savedDayRecords = [];
+    let editingRecordIndex = -1;
+
+    function saveCurrentDayRecord() {
+        playClickSound();
+        const now = new Date();
+        const d = String(now.getDate()).padStart(2, '0');
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const y = now.getFullYear();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        
+        const recordName = `Kayıtlı: ${d}/${m}/${y} ${hh}:${mm}`;
+
+        const recordData = {
+            name: recordName,
+            dateObj: new Date(y, now.getMonth(), now.getDate()).getTime(),
+            won: document.getElementById('farm-won').value,
+            yang: document.getElementById('farm-yang').value,
+            rate: document.getElementById('farm-rate').value,
+            alchemy: document.getElementById('risk-alchemy').value,
+            sash: document.getElementById('risk-sash').value,
+            upgrade: document.getElementById('risk-upgrade').value,
+            costume: document.getElementById('risk-costume').value,
+            production: document.getElementById('risk-production').value,
+            chests: JSON.parse(JSON.stringify(activeChests)),
+            totalTLText: document.getElementById('total-tl-val').innerText,
+            totalWonText: document.getElementById('total-net-won-val').innerText,
+            rawTL: parseTL(document.getElementById('total-tl-val').innerText),
+            rawWon: parseWon(document.getElementById('total-net-won-val').innerText)
+        };
+
+        if (editingRecordIndex >= 0) {
+            recordData.name = savedDayRecords[editingRecordIndex].name;
+            recordData.dateObj = savedDayRecords[editingRecordIndex].dateObj;
+            savedDayRecords[editingRecordIndex] = recordData;
+            editingRecordIndex = -1;
+            showCustomAlert("Güncellendi", `Kayıt başarı ile güncellendi.<br><b>${recordData.name}</b>`, "✅");
+        } else {
+            savedDayRecords.unshift(recordData);
+            showCustomAlert("Gün Kaydedildi", `Gün başarı ile kayıt altına alındı.<br><b>${d}/${m}/${y} ${hh}:${mm}</b>`, "💾");
+        }
+
+        saveCurrentCharData();
+        renderDayRecords();
+    }
+
+    function parseTL(str) { return parseFloat(str.replace(' TL', '').trim()) || 0; }
+    function parseWon(str) { return parseFloat(str.replace(' W', '').trim()) || 0; }
+
+    function resetCurrentDayData() {
+        playClickSound();
+        if(confirm("Mevcut gün kazançları ve sandık listesi sıfırlanacak. Emin misiniz?")) {
+            document.getElementById('farm-won').value = 0;
+            document.getElementById('farm-yang').value = 0;
+            document.getElementById('risk-alchemy').value = 0;
+            document.getElementById('risk-sash').value = 0;
+            document.getElementById('risk-upgrade').value = 0;
+            document.getElementById('risk-costume').value = 0;
+            document.getElementById('risk-production').value = 0;
+            activeChests = [];
+            
+            renderChestList();
+            calcTotalIncome();
+            saveCurrentCharData();
+            showCustomAlert("Sıfırlandı", "Mevcut gün verileri başarıyla sıfırlandı.", "🔄");
+        }
+    }
+
+    function renderDayRecords() {
+        const container = document.getElementById('history-list-container');
+        document.getElementById('history-count-badge').innerText = savedDayRecords.length;
+        container.innerHTML = "";
+
+        let sumTL = 0;
+        let sumWon = 0;
+        let uniqueDaysCount = 0;
+
+        if(savedDayRecords.length === 0) {
+            container.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">Henüz kayıtlı gün bulunmuyor.</span>`;
+        } else {
+            let dateTimestamps = [];
+            savedDayRecords.forEach((rec, idx) => {
+                let tTL = rec.rawTL !== undefined ? rec.rawTL : parseTL(rec.totalTLText);
+                let tWon = rec.rawWon !== undefined ? rec.rawWon : parseWon(rec.totalWonText);
+                sumTL += tTL;
+                sumWon += tWon;
+
+                let dTs = rec.dateObj;
+                if(!dTs) {
+                    try {
+                        let parts = rec.name.split(': ')[1].split(' ')[0].split('/');
+                        let dObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                        dTs = dObj.getTime();
+                    } catch(e) {
+                        dTs = new Date().setHours(0,0,0,0);
+                    }
+                }
+                dateTimestamps.push(dTs);
+
+                const item = document.createElement('div');
+                item.className = "history-item";
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight:800; color:var(--accent-gold);">${rec.name}</div>
+                        <div style="color:var(--text-muted); font-size:0.68rem; margin-top:2px;">Kazanç: <b style="color:${tWon >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${tWon >= 0 ? '+' : ''}${tWon.toFixed(2)} W</b> (<span style="color:${tTL >= 0 ? 'var(--text-main)' : 'var(--accent-red)'};">${tTL >= 0 ? '+' : ''}${tTL.toFixed(1)} TL</span>)</div>
+                    </div>
+                    <div style="display:flex; gap:4px; justify-content:flex-end;">
+                        <button class="btn-sm btn-blue" onclick="loadDayRecord(${idx})" title="Yükle">Yükle</button>
+                        <button class="btn-sm" onclick="prepUpdateRecord(${idx})" style="background:var(--accent-gold); color:#000;" title="Üzerine Güncelle">Güncelle</button>
+                        <button class="btn-sm btn-red" onclick="deleteDayRecord(${idx})" title="Sil">Sil</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            if(dateTimestamps.length > 0) {
+                let minDate = Math.min(...dateTimestamps);
+                let maxDate = Math.max(...dateTimestamps);
+                let diffTime = Math.abs(maxDate - minDate);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                uniqueDaysCount = diffDays + 1;
+            }
+        }
+
+        document.getElementById('history-total-days-lbl').innerText = `Toplam ${uniqueDaysCount} Günlük Veri`;
+        
+        const tlEl = document.getElementById('history-total-tl-val');
+        const wonEl = document.getElementById('history-total-won-val');
+
+        tlEl.innerText = `${sumTL >= 0 ? '+' : ''}${sumTL.toFixed(1)} TL`;
+        tlEl.style.color = sumTL >= 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
+
+        wonEl.innerText = `${sumWon >= 0 ? '+' : ''}${sumWon.toFixed(2)} W`;
+        wonEl.style.color = sumWon >= 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
+    }
+
+    function loadDayRecord(idx) {
+        playClickSound();
+        const rec = savedDayRecords[idx];
+        if(!rec) return;
+
+        document.getElementById('farm-won').value = rec.won;
+        document.getElementById('farm-yang').value = rec.yang;
+        document.getElementById('farm-rate').value = rec.rate;
+        document.getElementById('risk-alchemy').value = rec.alchemy;
+        document.getElementById('risk-sash').value = rec.sash;
+        document.getElementById('risk-upgrade').value = rec.upgrade;
+        document.getElementById('risk-costume').value = rec.costume;
+        document.getElementById('risk-production').value = rec.production;
+        activeChests = JSON.parse(JSON.stringify(rec.chests));
+
+        renderChestList();
+        calcTotalIncome();
+        saveCurrentCharData();
+        showCustomAlert("Yüklendi", `"${rec.name}" verileri başarıyla yüklendi!`, "📂");
+    }
+
+    function prepUpdateRecord(idx) {
+        playClickSound();
+        editingRecordIndex = idx;
+        const rec = savedDayRecords[idx];
+        if(!rec) return;
+
+        document.getElementById('farm-won').value = rec.won;
+        document.getElementById('farm-yang').value = rec.yang;
+        document.getElementById('farm-rate').value = rec.rate;
+        document.getElementById('risk-alchemy').value = rec.alchemy;
+        document.getElementById('risk-sash').value = rec.sash;
+        document.getElementById('risk-upgrade').value = rec.upgrade;
+        document.getElementById('risk-costume').value = rec.costume;
+        document.getElementById('risk-production').value = rec.production;
+        activeChests = JSON.parse(JSON.stringify(rec.chests));
+        renderChestList();
+        calcTotalIncome();
+
+        showCustomAlert("Güncelleme Hazır", `"${rec.name}" kaydı yüklendi. Değişiklikleri yaptıktan sonra <b>"Günü Kaydet"</b> butonuna basarak güncelleyebilirsin!`, "📝");
+    }
+
+    function deleteDayRecord(idx) {
+        playClickSound();
+        if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+            savedDayRecords.splice(idx, 1);
+            if(editingRecordIndex === idx) editingRecordIndex = -1;
+            saveCurrentCharData();
+            renderDayRecords();
+        }
+    }
+
+    let currentAlarmAudioLoop = null;
+    function playAlarmSound(type = 'bell') {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let duration = 5;
+
+            if (currentAlarmAudioLoop) {
+                clearInterval(currentAlarmAudioLoop);
+            }
+
+            const playNote = () => {
+                if(ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+
+                if (type === 'bell') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                    osc.start(); osc.stop(ctx.currentTime + 0.8);
+                } else if (type === 'beep') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                    osc.start(); osc.stop(ctx.currentTime + 0.25);
+                } else if (type === 'electronic') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                    osc.start(); osc.stop(ctx.currentTime + 0.35);
+                } else if (type === 'soft') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(350, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
+                    osc.start(); osc.stop(ctx.currentTime + 1.0);
+                } else if (type === 'critical') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(950, ctx.currentTime);
+                    osc.frequency.setValueAtTime(700, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                    osc.start(); osc.stop(ctx.currentTime + 0.4);
+                }
+            };
+
+            playNote();
+            let intervalTime = (type === 'beep' || type === 'critical') ? 350 : 900;
+            let elapsed = 0;
+            currentAlarmAudioLoop = setInterval(() => {
+                elapsed += intervalTime;
+                if(elapsed >= duration * 1000) {
+                    clearInterval(currentAlarmAudioLoop);
+                    currentAlarmAudioLoop = null;
+                } else {
+                    playNote();
+                }
+            }, intervalTime);
+        } catch(e) {}
+    }
+
+    const yoharaBossDurations = {
+        alastor: { name: "Alastor (Ejderha Gözü)", hours: 4 },
+        balator: { name: "Balator", hours: 4 },
+        aamon: { name: "Aamon", hours: 3 },
+        nethis: { name: "Yılan Kraliçesi Nethis", hours: 4 },
+        argos: { name: "Argos (Dongan Ovası)", hours: 2 },
+        natanan: { name: "Natanan (Dongan / Nam Gwang)", hours: 2 },
+        myrprimus: { name: "Myr Primus / Gazisi (Namgan)", hours: 1 },
+        yiladreisi: { name: "Bozulmuş Savaş Reisi (Yılad)", hours: 2 },
+        yiliansavator: { name: "Güçlü Yılan Savaşçısı", hours: 2 },
+        yilankappasi: { name: "Yılan Kappası & Münzevisi", hours: 1.5 },
+        sungmahi: { name: "Sung Mahi Karargah Komutanı", hours: 2 }
+    };
+
+    let yoharaBossInterval = null;
+    function onYoharaBossSelectChange() {
+        playClickSound();
+        const val = document.getElementById('yohara-boss-select').value;
+        const boss = yoharaBossDurations[val];
+        document.getElementById('yohara-boss-lbl').innerText = `${boss.name} İçin Kalan Süre`;
+        let totalSec = Math.round(boss.hours * 3600);
+        document.getElementById('yohara-boss-timer-val').innerText = formatSeconds(totalSec);
+        document.getElementById('yohara-boss-box').classList.remove('alarm-active');
+        if(yoharaBossInterval) { clearInterval(yoharaBossInterval); yoharaBossInterval = null; }
+    }
+
+    function startYoharaBossTimer() {
+        playClickSound();
+        const val = document.getElementById('yohara-boss-select').value;
+        const boss = yoharaBossDurations[val];
+        let sec = Math.round(boss.hours * 3600);
+        
+        const boxEl = document.getElementById('yohara-boss-box');
+        boxEl.classList.remove('alarm-active');
+        
+        if(yoharaBossInterval) clearInterval(yoharaBossInterval);
+        yoharaBossInterval = setInterval(() => {
+            sec--;
+            document.getElementById('yohara-boss-timer-val').innerText = formatSeconds(sec);
+            if(sec <= 0) {
+                clearInterval(yoharaBossInterval);
+                yoharaBossInterval = null;
+                boxEl.classList.add('alarm-active');
+                showCustomAlert("Yohara Boss'u Çıktı!", `<b>${boss.name}</b> yeniden doğdu! Kesim vakti.`, "🐉");
+                playAlarmSound('bell');
+            }
+        }, 1000);
+    }
+
+    function resetYoharaBossTimer() {
+        playClickSound();
+        if(yoharaBossInterval) { clearInterval(yoharaBossInterval); yoharaBossInterval = null; }
+        onYoharaBossSelectChange();
+    }
+
+    const serverEventsData = {
+        bagjanamu: { name: "Bagjanamu", specials: "• Sabit Özellik: %25 Daha Az Boss Canı<br>• Sabit Etkinlik: Çiçek Çocuklar Aktif!", events: "• Futbol Topu / Ay Işığı Sandığı Etkinliği (Hafta Sonu)<br>• Okey Kartı Hazırlığı" },
+        marmara: { name: "Marmara", specials: "• Standart Sunucu Özellikleri", events: "• Ay Işığı Sandığı Düşürme (Çarşamba)<br>• Futbol Topu Etkinliği" },
+        ezel: { name: "Ezel", specials: "• Standart Sunucu Özellikleri", events: "• Canavar Avı (Boss) Etkinliği<br>• Futbol Topu" },
+        barbaros: { name: "Barbaros", specials: "• Standart Sunucu Özellikleri", events: "• Çiçek Çocuklar<br>• Okey Kartı" },
+        dandanakan: { name: "Dandanakan", specials: "• Standart Sunucu Özellikleri", events: "• Futbol Topu Etkinliği" },
+        arkadaslar: { name: "Arkadaşlar", specials: "• Özel Topluluk Sunucusu", events: "• Ay Işığı Sandığı<br>• Futbol Topu" },
+        lucifer: { name: "[RUBY] Lucifer", specials: "• Ruby Sunucu Özel Drop Bonusu", events: "• Eşsiz Canavar Avı<br>• Okey Etkinliği" },
+        charon: { name: "[RUBY] Charon", specials: "• Ruby Sunucu Özel Drop Bonusu", events: "• Eşsiz Canavar Avı<br>• Futbol Topu" },
+        star: { name: "[SAPPHIRE] Star", specials: "• Sapphire Sunucu Özel Avantajları", events: "• Çiçek Çocuklar<br>• Ay Işığı Sandığı" },
+        safir: { name: "[SAPPHIRE] Safir", specials: "• Sapphire Sunucu Özel Avantajları", events: "• Okey Etkinliği<br>• Futbol Topu" },
+        dianite: { name: "[DIA] Nite", specials: "• Dia Sunucu Özel Avantajları", events: "• Canavar Avı<br>• Futbol Topu" }
+    };
+
+    function onServerEventChange() {
+        playClickSound();
+        const sKey = document.getElementById('server-event-select').value;
+        const sData = serverEventsData[sKey];
+        document.getElementById('server-special-title').innerText = `🟢 ${sData.name} Sunucu Özellikleri & Aktif Etkinlikler`;
+        document.getElementById('server-events-desc').innerHTML = `${sData.specials}<br>${sData.events}`;
+    }
+
+    let testInterval = null;
+    function startAlarmTest() {
+        playClickSound();
+        let sec = 5;
+        const boxEl = document.getElementById('test-alarm-box');
+        const valEl = document.getElementById('test-timer-val');
+        boxEl.classList.remove('alarm-active');
+        valEl.innerText = "00:05";
+
+        if(testInterval) clearInterval(testInterval);
+        testInterval = setInterval(() => {
+            sec--;
+            valEl.innerText = "00:0" + sec;
+            if(sec <= 0) {
+                clearInterval(testInterval);
+                boxEl.classList.add('alarm-active');
+                showCustomAlert("Süre Doldu!", "🔔 <b>Alarm & Sayaç Testi Tamamlandı!</b><br>Sesli ve görsel uyarı sisteminiz kusursuz çalışıyor.", "⏰");
+                let soundType = document.getElementById('alarm-sound-select') ? document.getElementById('alarm-sound-select').value : 'bell';
+                playAlarmSound(soundType);
+            }
+        }, 1000);
+    }
+
+    function resetAlarmTest() {
+        playClickSound();
+        if(testInterval) clearInterval(testInterval);
+        testInterval = null;
+        document.getElementById('test-timer-val').innerText = "00:05";
+        document.getElementById('test-alarm-box').classList.remove('alarm-active');
+    }
+
+    let huntInterval = null, huntSeconds = 0;
+    function toggleAutoHunt() {
+        playClickSound();
+        const btn = document.getElementById('hunt-btn');
+        if (huntInterval) {
+            clearInterval(huntInterval); huntInterval = null;
+            btn.innerText = "Başlat"; btn.className = "btn btn-green";
+        } else {
+            huntInterval = setInterval(() => {
+                huntSeconds++;
+                document.getElementById('auto-hunt-timer').innerText = formatSeconds(huntSeconds);
+            }, 1000);
+            btn.innerText = "Durdur"; btn.className = "btn btn-red";
+        }
+    }
+
+    function resetAutoHunt() {
+        playClickSound();
+        if(huntInterval) clearInterval(huntInterval);
+        huntInterval = null; huntSeconds = 0;
+        document.getElementById('auto-hunt-timer').innerText = "00:00:00";
+        document.getElementById('hunt-btn').innerText = "Başlat";
+        document.getElementById('hunt-btn').className = "btn btn-green";
+    }
+
+    function updateResetTimers() {
+        const now = new Date();
+        const nextDaily = new Date(now); nextDaily.setHours(24, 0, 0, 0);
+        document.getElementById('daily-reset-val').innerText = formatSeconds(Math.floor((nextDaily - now) / 1000));
+        document.getElementById('etp-reset-val').innerText = formatSeconds(Math.floor((nextDaily - now) / 1000));
+
+        const nextWeekly = new Date(now);
+        nextWeekly.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7)); nextWeekly.setHours(0, 0, 0, 0);
+        document.getElementById('weekly-reset-val').innerText = formatSeconds(Math.floor((nextWeekly - now) / 1000));
+
+        const nextMonthly = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0);
+        document.getElementById('monthly-reset-val').innerText = formatSeconds(Math.floor((nextMonthly - now) / 1000));
+
+        const nextMaint = new Date(now);
+        let dayDiff = (3 + 7 - now.getDay()) % 7;
+        if(dayDiff === 0 && now.getHours() >= 10) dayDiff = 7;
+        nextMaint.setDate(now.getDate() + dayDiff); nextMaint.setHours(10, 0, 0, 0);
+        document.getElementById('maint-reset-val').innerText = formatSeconds(Math.floor((nextMaint - now) / 1000));
+    }
+
+    function formatSeconds(sec) {
+        if (sec <= 0) return "00:00:00";
+        let h = String(Math.floor(sec / 3600)).padStart(2, '0');
+        let m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+        let s = String(sec % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    setInterval(updateResetTimers, 1000);
+
+    let mercInterval = null;
+    function startMercenaryTimer() {
+        playClickSound();
+        let sec = 24 * 3600;
+        const boxEl = document.getElementById('mercenary-box');
+        boxEl.classList.remove('alarm-active');
+        if(mercInterval) clearInterval(mercInterval);
+        mercInterval = setInterval(() => {
+            sec--;
+            document.getElementById('mercenary-timer-val').innerText = formatSeconds(sec);
+            if(sec <= 0) { 
+                clearInterval(mercInterval); 
+                boxEl.classList.add('alarm-active'); 
+                showCustomAlert("Süre Doldu!", "<b>Paralı Asker Görev Sıfırlama Süresi Doldu!</b><br>24 saatlik süre tamamlandı, yeni askerleri gönderebilirsin.", "⚔️");
+                playAlarmSound('bell');
+            }
+        }, 1000);
+    }
+
+    let mercStaminaInterval = null;
+    function startMercenaryStaminaTimer() {
+        playClickSound();
+        let sec = 24 * 3600;
+        const boxEl = document.getElementById('mercenary-stamina-box');
+        boxEl.classList.remove('alarm-active');
+        if(mercStaminaInterval) clearInterval(mercStaminaInterval);
+        mercStaminaInterval = setInterval(() => {
+            sec--;
+            document.getElementById('mercenary-stamina-timer-val').innerText = formatSeconds(sec);
+            if(sec <= 0) { 
+                clearInterval(mercStaminaInterval); 
+                boxEl.classList.add('alarm-active'); 
+                showCustomAlert("Süre Doldu!", "<b>Paralı Asker Dayanıklılık Süresi Doldu!</b><br>Dayanıklılık görevi tamamlandı.", "🛡️");
+                playAlarmSound('bell');
+            }
+        }, 1000);
+    }
+
+    function loadBioData() {
+        const key = document.getElementById('bio-select').value;
+        if(!bioCounts[key]) bioCounts[key] = 0;
+        renderBio();
+    }
+
+    function addBioProgress(val) {
+        playClickSound();
+        const key = document.getElementById('bio-select').value;
+        const max = bioData[key].max;
+        bioCounts[key] = Math.max(0, Math.min(max, (bioCounts[key] || 0) + val));
+        saveCurrentCharData();
+        renderBio();
+    }
+
+    function renderBio() {
+        const key = document.getElementById('bio-select').value;
+        const max = bioData[key].max;
+        const curr = bioCounts[key] || 0;
+        document.getElementById('bio-count-display').innerText = `${curr} / ${max}`;
+        document.getElementById('bio-left-display').innerText = max - curr;
+        document.getElementById('bio-progress-bar').style.width = `${(curr / max) * 100}%`;
+    }
+
+    let bioTimer = null;
+    function startBioCd() {
+        playClickSound();
+        let sec = 22 * 3600;
+        const boxEl = document.getElementById('bio-box-cd');
+        boxEl.classList.remove('alarm-active');
+        if(bioTimer) clearInterval(bioTimer);
+        bioTimer = setInterval(() => {
+            sec--;
+            document.getElementById('bio-cd-val').innerText = formatSeconds(sec);
+            if(sec <= 0) { 
+                clearInterval(bioTimer); 
+                boxEl.classList.add('alarm-active'); 
+                showCustomAlert("Süre Doldu!", "<b>Biyolog Bekleme Süresi Doldu!</b><br>22 saatlik süre bitti, yeni biyolog eşyasını verebilirsin.", "🧪");
+                playAlarmSound('bell');
+            }
+        }, 1000);
+    }
+
+    function resetBioCd() {
+        playClickSound();
+        if(bioTimer) clearInterval(bioTimer);
+        bioTimer = null;
+        document.getElementById('bio-cd-val').innerText = "22:00:00";
+        document.getElementById('bio-box-cd').classList.remove('alarm-active');
+    }
+
+    let activeChests = [];
+    function addSelectedChest() {
+        playClickSound();
+        const name = document.getElementById('chest-select').value;
+        if(activeChests.some(b => b.name === name)) return;
+        activeChests.push({ name, count: 0, price: 0 });
+        saveCurrentCharData();
+        renderChestList();
+    }
+
+    function addAskerItemToIncome() {
+        playClickSound();
+        const name = document.getElementById('asker-item-select').value;
+        const price = parseFloat(document.getElementById('asker-item-price').value) || 0;
+        const count = parseInt(document.getElementById('asker-item-count').value) || 1;
+
+        let existing = activeChests.find(b => b.name === name);
+        if(existing) {
+            existing.count += count;
+            existing.price = price;
+        } else {
+            activeChests.push({ name: `Asker: ${name}`, count, price });
+        }
+        saveCurrentCharData();
+        renderChestList();
+        showCustomAlert("Eklendi", `⚔️ Paralı Asker ödülü ("${name}" x${count}) Won kazançlarına başarıyla eklendi!`, "✅");
+    }
+
+    function renderChestList() {
+        const container = document.getElementById('active-chest-list');
+        container.innerHTML = "";
+        activeChests.forEach((b, idx) => {
+            const row = document.createElement('div');
+            row.style.cssText = "background:var(--bg-input); padding:8px; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:6px;";
+            row.innerHTML = `
+                <span style="font-size:0.75rem; font-weight:800; color:var(--accent-gold); flex:1;">${b.name}</span>
+                <input type="number" placeholder="Fiyat(W)" value="${b.price || ''}" style="width:80px;" oninput="updateActiveChest(${idx}, 'price', this.value)">
+                <input type="number" placeholder="Adet" value="${b.count || ''}" style="width:60px;" oninput="updateActiveChest(${idx}, 'count', this.value)">
+                <button class="btn-sm btn-red" onclick="removeActiveChest(${idx})">X</button>
+            `;
+            container.appendChild(row);
+        });
+        calcTotalIncome();
+    }
+
+    function updateActiveChest(idx, field, val) {
+        activeChests[idx][field] = parseFloat(val) || 0;
+        saveCurrentCharData();
+        calcTotalIncome();
+    }
+
+    function removeActiveChest(idx) {
+        playClickSound();
+        activeChests.splice(idx, 1);
+        saveCurrentCharData();
+        renderChestList();
+    }
+
+    function calcTotalIncome() {
+        const won = parseFloat(document.getElementById('farm-won').value) || 0;
+        const yangM = parseFloat(document.getElementById('farm-yang').value) || 0;
+        const rate = parseFloat(document.getElementById('farm-rate').value) || 0;
+        
+        const riskAlchemy = parseFloat(document.getElementById('risk-alchemy').value) || 0;
+        const riskSash = parseFloat(document.getElementById('risk-sash').value) || 0;
+        const riskUpgrade = parseFloat(document.getElementById('risk-upgrade').value) || 0;
+        const riskCostume = parseFloat(document.getElementById('risk-costume').value) || 0;
+        const riskProduction = parseFloat(document.getElementById('risk-production').value) || 0;
+        
+        let chestWon = 0;
+        let breakdownHTML = "";
+
+        if (won > 0) breakdownHTML += `<div class="breakdown-item"><span>Direkt Won Kazancı:</span> <span style="color:var(--accent-gold);">${won} W</span></div>`;
+        if (yangM > 0) breakdownHTML += `<div class="breakdown-item"><span>Yang Kazancı:</span> <span style="color:var(--accent-gold);">${yangM}M (${(yangM/100).toFixed(2)} W)</span></div>`;
+
+        activeChests.forEach(b => {
+            let subTotal = (b.count * b.price);
+            chestWon += subTotal;
+            if (b.count > 0 && b.price > 0) {
+                breakdownHTML += `<div class="breakdown-item"><span>${b.name} (${b.count} adet):</span> <span style="color:var(--accent-gold);">${subTotal.toFixed(2)} W</span></div>`;
+            }
+        });
+
+        if (riskAlchemy !== 0) breakdownHTML += `<div class="breakdown-item"><span>Simya Denemeleri:</span> <span style="color:${riskAlchemy >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${riskAlchemy > 0 ? '+' : ''}${riskAlchemy} W</span></div>`;
+        if (riskSash !== 0) breakdownHTML += `<div class="breakdown-item"><span>Kuşak Denemeleri:</span> <span style="color:${riskSash >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${riskSash > 0 ? '+' : ''}${riskSash} W</span></div>`;
+        if (riskUpgrade !== 0) breakdownHTML += `<div class="breakdown-item"><span>İtem Yükseltme:</span> <span style="color:${riskUpgrade >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${riskUpgrade > 0 ? '+' : ''}${riskUpgrade} W</span></div>`;
+        if (riskCostume !== 0) breakdownHTML += `<div class="breakdown-item"><span>Kutsama / Efsun:</span> <span style="color:${riskCostume >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${riskCostume > 0 ? '+' : ''}${riskCostume} W</span></div>`;
+        if (riskProduction !== 0) breakdownHTML += `<div class="breakdown-item"><span>Üretim Denemeleri:</span> <span style="color:${riskProduction >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${riskProduction > 0 ? '+' : ''}${riskProduction} W</span></div>`;
+
+        if (breakdownHTML === "") {
+            breakdownHTML = `<span style="color:var(--text-muted);">Henüz veri girilmedi veya aktif kazanç kalemi bulunmuyor.</span>`;
+        }
+        document.getElementById('breakdown-list').innerHTML = breakdownHTML;
+
+        let totalRiskWon = riskAlchemy + riskSash + riskUpgrade + riskCostume + riskProduction;
+        let totalWonEq = won + (yangM / 100) + chestWon + totalRiskWon;
+        let totalTL = totalWonEq * rate;
+        
+        document.getElementById('total-tl-val').innerText = `${totalTL.toFixed(1)} TL`;
+        document.getElementById('total-net-won-val').innerText = `${totalWonEq.toFixed(2)} W`;
+    }
+
+    const farmData = {
+        afk: [
+            {
+                title: "Yohara AFK Farmı",
+                items: [
+                    { 
+                        name: "Sunak Farmı", 
+                        isAfkProductTable: true, 
+                        itemsList: [
+                            { name: "Parıltılı İstiridye" }, 
+                            { name: "9. Yolun Kitap Sandığı" }, 
+                            { name: "Nefis Lokma" }, 
+                            { name: "Görev Kitabı (Prens 3)" }, 
+                            { name: "Görev Kitabı (Namgan Yarığı ve Dongan Ovası)" }, 
+                            { name: "Deniz Kızı Sandığı" }, 
+                            { name: "Yılan Deseni" }, 
+                            { name: "Yılan İpeği" }
+                        ],
+                        lootText: "Gizemli Sunak farmında temel olarak Parıltılı İstiridye, 9. Yol Kitap Sandığı, Nefis Lokma ve Yılan Deseni/İpeği elde edilir." 
+                    },
+                    { 
+                        name: "Aura Farmı", 
+                        isAfkProductTable: true, 
+                        itemsList: [
+                            { name: "Parıltılı İstiridye" },
+                            { name: "9. Yolun Kitap Sandığı" },
+                            { name: "Nefis Lokma" },
+                            { name: "Görev Kitabı (Prens 3)" },
+                            { name: "Görev Kitabı (Namgan Yarığı ve Dongan Ovası)" },
+                            { name: "Deniz Kızı Sandığı" },
+                            { name: "Yılan Deseni" },
+                            { name: "Yılan İpeği" }
+                        ],
+                        lootText: "Aura farmında Auranın Ateş Runiği ve temel Yohara materyalleri kasılır." 
+                    },
+                    { 
+                        name: "Yılad Parıltılı İstiridye Farmı", 
+                        isAfkProductTable: true, 
+                        itemsList: [
+                            { name: "Parıltılı İstiridye" },
+                            { name: "9. Yolun Kitap Sandığı" },
+                            { name: "Nefis Lokma" },
+                            { name: "Görev Kitabı (Prens 3)" },
+                            { name: "Görev Kitabı (Namgan Yarığı ve Dongan Ovası)" },
+                            { name: "Deniz Kızı Sandığı" },
+                            { name: "Yılan Deseni" },
+                            { name: "Yılan İpeği" }
+                        ],
+                        lootText: "Yılad Geçidi'nde Parıltılı İstiridye ve özel Yohara kitap sandıkları elde edilir." 
+                    }
+                ]
+            }
+        ],
+        manual: [
+            {
+                title: "Yohara Farmı",
+                items: [
+                    { name: "Yılad Metin Farmı", noExpense: false, lootText: "Şeytanların Taşı +4, Parıltılı İstiridye, Yılan Deseni, Yılan İpeği vs. materyaller elde edilir." },
+                    { name: "Dongan Ovası Metin Farmı", noExpense: false, lootText: "Şeytanların Taşı +4, Tamlık Kitabı, Kitap Sandığı Misilleme vs. droplar elde edilir." }
+                ]
+            },
+            {
+                title: "Ne var? Ne Yok? Haftalık Görevleri",
+                items: [
+                    { name: "Görev Kitabı (Yohara)", noExpense: true, lootText: "Bu görev tamamlandığında 1x Donmuş Anahtar, 2x Hızlandırıcı %30 elde edilir." },
+                    { name: "Cehennem Kulesi", noExpense: true, lootText: "Bu görev tamamlandığında 1x Kutsama (6.-7. Efsun Değiştirme) ve 1x Donmuş Anahtar kazanılır." }
+                ]
+            },
+            {
+                title: "Görev Kitabı (Prens 3)",
+                items: [
+                    { name: "Razador'da Yapılan Prens 3", noExpense: false, lootText: "Bu görevin yapımının en pratik yolu Razador Boss'u kesilirken sadece o haritanın görevlerini kabul edip, diğer görevleri iptal ederek yapılmasıdır. En kıymetli görev ödülü \"Cor Draconis\"dir. İçerisinden İşlenmemişten, Efsanevi saflığa kadar çeşitli simyalar çıkmaktadır." }
+                ]
+            },
+            {
+                title: "Maden Farmı",
+                items: [
+                    { name: "Tapınak Maden Farmı", noExpense: true, lootText: "Cennetin Gözyaşı, Elmas, Abanoz gibi en gözde madenleri kazarak, birden fazla +30 Lv. hesap ile güzel gelirler elde edilebilir." }
+                ]
+            },
+            {
+                title: "Uyanış Zindanı Farmı",
+                isUyanisZindani: true,
+                subGroups: [
+                    {
+                        title: "TS: Efsunlu Orman",
+                        items: [
+                            { name: "TS: Jotun Farmı", noExpense: false, lootText: "4x TS: Jotun Sandığı, 3x Uyanış Sandığı ve 30M yang elde edilir." },
+                            { name: "TS: Efsunlu Orman Metin Farmı", noExpense: false, lootText: "Cesaret Pelerini, Tecrübe Yüzüğü, Hırsızın Eldiveni, +4 Zihin taşları ile birlikte değerli beceri kitaplarını çok seri bir şekilde kasabilirsiniz. Haritadaki metinler yalnızca size ait!" }
+                        ]
+                    }
+                ],
+                items: [
+                    { name: "TS: Razador", noExpense: false, lootText: "TS: Razador Sandığı elde edilir." },
+                    { name: "TS: Nemere", noExpense: false, lootText: "TS: Nemere Sandığı elde edilir." },
+                    { name: "TS: Beran Setaou", noExpense: false, lootText: "TS: Beran Setaou Sandığı elde edilir." }
+                ]
+            },
+            {
+                title: "Klasik Boss Farmı",
+                items: [
+                    { name: "Razador", noExpense: false, lootText: "8-10 Adet Razador Sandığı elde edilir." },
+                    { name: "Nemere", noExpense: false, lootText: "8-10 Adet Nemere Sandığı elde edilir." },
+                    { name: "Beran Setaou", noExpense: false, lootText: "Beran Setaou Sandıkları elde edilir." },
+                    { name: "Jotun", noExpense: false, lootText: "Jotun Thrym boss kesiminden Jotun Heim Sandığı ve orman ruhları düşer." },
+                    { name: "Meley", noExpense: false, lootText: "Grup veya lonca olarak girildiğinde karakter başına sandık elde edilir." },
+                    { name: "Hidra", noExpense: false, lootText: "1-5 adet Hidra sandığı, Arttırma Kağıdı, Efsun Nesnesi, Zihin Taşı Destesi, Süs Taşı ve çeşitli inciler elde edilir." }
+                ]
+            },
+            {
+                title: "ETP Farmı",
+                items: [
+                    { name: "2. Köy ETP Farmı", noExpense: true, hideTimeAndExpense: true, lootText: "30 Lv. birden fazla okçu yaparak ETP görevlerini hızlıca bitirebilirsiniz." },
+                    { name: "Katakomb ETP Farmı", noExpense: true, hideTimeAndExpense: true, lootText: "75 Lv. karakterler ile hızlıca ETP görevlerinizi tamamlayabilirsiniz." }
+                ]
+            },
+            {
+                title: "Üretim Farmı",
+                items: [
+                    { name: "Enerji Parçası Üretimi", noExpense: false, hideTimeAndExpense: true, lootText: "Mümkün olabildiğince boş ve çok envanter ile silah satıcısından Kedi Isırığı Bıçak +0 satın alarak, Simyacıya sürükleyerek Enerji Parçası elde edilebilir." },
+                    { name: "Enerji Kristali Üretimi", noExpense: false, hideTimeAndExpense: true, lootText: "Simyager'de enerji parçalarından Enerji Kristali elde edilir." },
+                    { name: "Şebnem Üretimi (Gerekli Malzemeler)", isSebnem: true, noExpense: true, hideTimeAndExpense: true, lootText: "Çiçek ve otlar ile kritik/delici şebnemler üretilir." }
+                ]
+            }
+        ]
+    };
+
+    let selectedCalcType = null;
+    let currentCalcItem = null;
+
+    function onCalcTypeChange() {
+        playClickSound();
+        const afk = document.getElementById('type-afk').checked;
+        selectedCalcType = afk ? 'afk' : 'manual';
+        document.getElementById('step-3-card').classList.remove('locked');
+        document.getElementById('step-4-card').classList.remove('locked');
+        renderCalcAccordion();
+        calculateCalc();
+    }
+
+    function onCalcTimePresetChange() {
+        playClickSound();
+        const selectedRadio = document.querySelector('input[name="time_preset"]:checked');
+        if (selectedRadio) {
+            document.getElementById('calc-farm-hours').value = selectedRadio.value;
+            calculateCalc();
+        }
+    }
+
+    function onCalcCustomHoursInput() {
+        document.querySelectorAll('input[name="time_preset"]').forEach(r => r.checked = false);
+        calculateCalc();
+    }
+
+    function renderCalcAccordion() {
+        const container = document.getElementById('accordion-container');
+        container.innerHTML = '';
+        const categories = farmData[selectedCalcType];
+        categories.forEach((cat) => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'accordion-item';
+            let html = `<div class="accordion-header" onclick="toggleCalcAccordion(this)">${cat.title}</div>`;
+            html += `<div class="accordion-content">`;
+            
+            if (cat.isUyanisZindani) {
+                cat.subGroups.forEach(subG => {
+                    html += `<div class="nested-accordion">
+                                <div class="nested-header" onclick="toggleCalcNested(this)">${subG.title}</div>
+                                <div class="nested-content">`;
+                    subG.items.forEach(sub => { html += createCalcSubItemHTML(sub, `${cat.title} › ${subG.title}`); });
+                    html += `</div></div>`;
+                });
+                cat.items.forEach(sub => { html += createCalcSubItemHTML(sub, cat.title); });
+            } else {
+                cat.items.forEach(sub => { html += createCalcSubItemHTML(sub, cat.title); });
+            }
+            html += `</div>`;
+            itemEl.innerHTML = html;
+            container.appendChild(itemEl);
+        });
+    }
+
+    function createCalcSubItemHTML(sub, categoryTitle) {
+        const subData = JSON.stringify(sub).replace(/"/g, '&quot;');
+        const safeLootText = (sub.lootText || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+        
+        if(sub.isAfkProductTable) {
+            let rowsHTML = "";
+            sub.itemsList.forEach((it, i) => {
+                rowsHTML += `
+                    <div style="background:var(--bg-input); padding:6px 8px; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:4px;">
+                        <span style="font-size:0.72rem; font-weight:700; color:var(--text-main); flex:1;">${it.name}</span>
+                        <input type="number" id="sub-item-count-${sub.name.replace(/\s+/g,'')}-${i}" value="" placeholder="Miktar" style="width:70px;" oninput="calculateCalc()" title="Adet Miktarı">
+                        <input type="number" id="sub-item-price-${sub.name.replace(/\s+/g,'')}-${i}" value="" placeholder="Fiyat(M)" style="width:90px;" oninput="calculateCalc()" title="M cinsinden Birim Fiyatı">
+                    </div>
+                `;
+            });
+            
+            let afkTableHTML = `
+                <div style="margin-top:4px; border-top:1px dashed var(--border-color); padding-top:8px;">
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>📦 Sabit Droplar & Fiyat Tablosu</span>
+                        <span class="tooltip-icon" onclick="showCustomAlert('Fiyat Nasıl Yazılır?', 'Ürün 75k ise <b>0.075</b> (M cinsinden) yazılmalıdır.<br>Ürün 300k ise <b>0.3</b> yazılmalıdır.<br>Ürün 50m ise <b>50</b> yazılmalıdır.<br>4 Won ise <b>400</b> (400M) yazılmalıdır.', '❓')">?</span>
+                    </div>
+                    ${rowsHTML}
+                    <div style="margin-top:6px;">
+                        <label style="color:var(--accent-gold);">✨ Diğer Ekstra Kazançlar (Won/M)</label>
+                        <input type="text" id="afk-other-income-${sub.name.replace(/\s+/g,'')}" value="0" placeholder="Örn: 1.5W veya 250M..." oninput="calculateCalc()">
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="afk-accordion-box" id="container-${sub.name.replace(/\s+/g,'')}" style="margin-bottom: 10px;">
+                    <div class="afk-accordion-title sub-item" style="padding:10px 14px;" onclick="toggleAfkAccordion(this); selectCalcSubItem(this, ${subData}, '${categoryTitle}')">
+                        <span style="font-size:0.85rem;">${sub.name} <span style="font-size:0.7rem; font-weight:normal; opacity:0.6;">(Genişlet ▼)</span></span>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <button type="button" class="info-btn" onclick="event.stopPropagation(); openLootModal('${sub.name.replace(/'/g, "\\'")}', '${safeLootText}')">Ne Elde Edilir?</button>
+                            <span style="border: 1.5px solid currentColor; color: currentColor; background: rgba(0,0,0,0.15); font-weight: 800; padding: 4px 16px; border-radius: 6px; pointer-events: none; transition: all 0.2s;">Seç</span>
+                        </div>
+                    </div>
+                    <div class="afk-accordion-body">
+                        ${afkTableHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="sub-item-container" id="container-${sub.name.replace(/\s+/g,'')}" style="border: 1.5px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; background: transparent; overflow: hidden;">
+                <div class="sub-item" style="padding:10px 14px; border-radius: 10px; margin: 0; display:flex; justify-content:space-between; align-items:center;" onclick="selectCalcSubItem(this, ${subData}, '${categoryTitle}')">
+                    <span style="font-size:0.85rem;">${sub.name}</span>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button type="button" class="info-btn" onclick="event.stopPropagation(); openLootModal('${sub.name.replace(/'/g, "\\'")}', '${safeLootText}')">Ne Elde Edilir?</button>
+                        <span style="border: 1.5px solid currentColor; color: currentColor; background: rgba(0,0,0,0.15); font-weight: 800; padding: 4px 16px; border-radius: 6px; pointer-events: none; transition: all 0.2s;">Seç</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function openLootModal(title, text) {
+        playClickSound();
+        showCustomAlert(`📦 ${title} - Ne Elde Edilir?`, text.replace(/\n/g, '<br>'), '📜');
+    }
+
+    function toggleCalcAccordion(header) {
+        playClickSound();
+        const item = header.parentElement;
+        const wasActive = item.classList.contains('active');
+        document.querySelectorAll('.calc-wrapper .accordion-item').forEach(el => el.classList.remove('active'));
+        if (!wasActive) item.classList.add('active');
+    }
+
+    function toggleCalcNested(header) { 
+        playClickSound();
+        header.parentElement.classList.toggle('active'); 
+    }
+
+    function selectCalcSubItem(element, itemData, categoryTitle) {
+        playClickSound();
+        document.querySelectorAll('.calc-wrapper .sub-item').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        currentCalcItem = { ...itemData, category: categoryTitle };
+        document.getElementById('selected-farm-name').innerText = `${categoryTitle} › ${itemData.name}`;
+
+        const standardInputs = document.getElementById('standard-inputs');
+        const afkInputs = document.getElementById('afk-custom-inputs');
+        const expenseGroup = document.getElementById('expense-group');
+        const infoCard = document.getElementById('info-card');
+        const standardResultBoxes = document.getElementById('standard-result-boxes');
+        
+        if (itemData.hideTimeAndExpense) {
+            document.getElementById('step-4-card').style.display = 'none';
+        } else {
+            document.getElementById('step-4-card').style.display = 'block';
+        }
+
+        if (itemData.isAfkProductTable) {
+            standardInputs.style.display = 'none';
+            afkInputs.style.display = 'block';
+            infoCard.style.display = 'none';
+            standardResultBoxes.style.display = 'none';
+        } else {
+            standardInputs.style.display = 'block';
+            afkInputs.style.display = 'none';
+            infoCard.style.display = 'none';
+            standardResultBoxes.style.display = 'grid';
+            if (itemData.noExpense) {
+                expenseGroup.style.display = 'none';
+                document.getElementById('calc-expense-m').value = 0;
+            } else {
+                expenseGroup.style.display = 'block';
+            }
+        }
+        calculateCalc();
+    }
+
+    function calculateCalc() {
+        const wonPrice = parseFloat(document.getElementById('calc-won-price').value) || 0;
+        let grossWon = 0, expenseWon = 0, hourlyWon = 0, hours = 1;
+        const isAfk = document.getElementById('type-afk').checked;
+
+        if (currentCalcItem && currentCalcItem.isAfkProductTable) {
+            const hoursVal = parseFloat(document.querySelector('input[name="afk_preset"]:checked').value) || 24;
+            const expenseWonAfk = parseFloat(document.getElementById('afk-expense-won').value) || 0;
+
+            let totalItemsWon = 0;
+            let breakdownHTML = "";
+
+            currentCalcItem.itemsList.forEach((item, idx) => {
+                const countInput = document.getElementById(`sub-item-count-${currentCalcItem.name.replace(/\s+/g,'')}-${idx}`);
+                const priceInput = document.getElementById(`sub-item-price-${currentCalcItem.name.replace(/\s+/g,'')}-${idx}`);
+                let count = countInput ? (parseFloat(countInput.value) || 0) : 0;
+                let priceM = priceInput ? (parseFloat(priceInput.value) || 0) : 0;
+                
+                let unitPriceWon = priceM / 100;
+                let subTotal = count * unitPriceWon;
+                totalItemsWon += subTotal;
+
+                if (count > 0 && priceM > 0) {
+                    breakdownHTML += `<div style="display:flex; justify-content:space-between; font-size:0.78rem; border-bottom:1px solid rgba(255,255,255,0.05); padding:6px 0;">
+                        <span style="color:var(--text-muted);">${item.name} <span style="color:var(--accent-gold)">(x${count})</span></span>
+                        <span style="color:var(--accent-green); font-weight:700;">+ ${subTotal.toFixed(2)} W</span>
+                    </div>`;
+                }
+            });
+
+            let otherInputEl = document.getElementById(`afk-other-income-${currentCalcItem.name.replace(/\s+/g,'')}`);
+            let otherInputStr = otherInputEl ? otherInputEl.value.trim().toUpperCase() : "0";
+            let otherWon = 0;
+            if(otherInputStr) {
+                if(otherInputStr.includes('M')) {
+                    let mVal = parseFloat(otherInputStr.replace('M', '')) || 0;
+                    otherWon = mVal / 100;
+                } else if(otherInputStr.includes('W')) {
+                    let wVal = parseFloat(otherInputStr.replace('W', '')) || 0;
+                    otherWon = wVal;
+                } else {
+                    otherWon = parseFloat(otherInputStr) || 0;
+                }
+                
+                if (otherWon > 0) {
+                    breakdownHTML += `<div style="display:flex; justify-content:space-between; font-size:0.78rem; border-bottom:1px solid rgba(255,255,255,0.05); padding:6px 0;">
+                        <span style="color:var(--text-muted);">Diğer Ekstra Kazançlar</span>
+                        <span style="color:var(--accent-green); font-weight:700;">+ ${otherWon.toFixed(2)} W</span>
+                    </div>`;
+                }
+            }
+
+            if (expenseWonAfk > 0) {
+                breakdownHTML += `<div style="display:flex; justify-content:space-between; font-size:0.78rem; border-bottom:1px solid rgba(255,255,255,0.05); padding:6px 0;">
+                    <span style="color:var(--text-muted);">Masraflar (Simya, İksir vb.)</span>
+                    <span style="color:var(--accent-red); font-weight:700;">- ${expenseWonAfk.toFixed(2)} W</span>
+                </div>`;
+            }
+
+            let totalGrossWon = totalItemsWon + otherWon;
+            let totalNetWon = Math.max(0, totalGrossWon - expenseWonAfk);
+            let totalNetTL = totalNetWon * wonPrice;
+
+            document.getElementById('net-tl-display').innerText = totalNetTL.toFixed(2) + " ₺";
+            document.getElementById('net-won-display').innerText = totalNetWon.toFixed(2) + " W";
+
+            let breakdownContainer = document.getElementById('afk-calc-breakdown');
+            if (!breakdownContainer) {
+                breakdownContainer = document.createElement('div');
+                breakdownContainer.id = 'afk-calc-breakdown';
+                breakdownContainer.style.cssText = "margin-top:10px; background:rgba(0,0,0,0.2); border:1px dashed var(--border-color); border-radius:8px; padding:10px; text-align:left;";
+                document.getElementById('result-card').appendChild(breakdownContainer);
+            }
+            
+            if (breakdownHTML !== "") {
+                breakdownContainer.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); font-size:0.8rem; margin-bottom:8px;">📋 Girdiğiniz Veriler ve Gelirler:</div>` + breakdownHTML;
+                breakdownContainer.style.display = 'block';
+            } else {
+                breakdownContainer.style.display = 'none';
+            }
+
+            let dailyEquivalentWon = (totalNetWon / hoursVal) * 24;
+            applyAfkBadgeAndCardStyle(dailyEquivalentWon);
+            return;
+        }
+
+        let existingBreakdown = document.getElementById('afk-calc-breakdown');
+        if (existingBreakdown) existingBreakdown.style.display = 'none';
+
+        hours = parseFloat(document.getElementById('calc-farm-hours').value) || 1;
+        hourlyWon = parseFloat(document.getElementById('calc-hourly-gross').value) || 0;
+        const expenseM = parseFloat(document.getElementById('calc-expense-m').value) || 0;
+        grossWon = hourlyWon * hours;
+        expenseWon = expenseM;
+
+        const netWon = Math.max(0, grossWon - expenseWon);
+        const netTl = netWon * wonPrice;
+        const hourlyTl = hourlyWon * wonPrice;
+
+        document.getElementById('net-tl-display').innerText = netTl.toFixed(2) + " ₺";
+        document.getElementById('net-won-display').innerText = netWon.toFixed(2) + " W";
+        document.getElementById('hourly-won-display').innerText = hourlyWon.toFixed(2) + " W";
+        document.getElementById('hourly-tl-display').innerText = hourlyTl.toFixed(2) + " ₺";
+        document.getElementById('gross-won-display').innerText = grossWon.toFixed(2) + " W";
+        document.getElementById('expense-won-display').innerText = expenseWon.toFixed(2) + " W";
+
+        const resultCard = document.getElementById('result-card');
+        const badge = document.getElementById('profit-badge');
+        resultCard.className = "card result-card";
+        badge.className = "profit-badge";
+
+        if (isAfk) {
+            let totalHours = hours > 0 ? hours : 1;
+            let dailyEquivalentWon = (netWon / totalHours) * 24;
+            applyAfkBadgeAndCardStyle(dailyEquivalentWon);
+        } else {
+            if (hourlyWon < 5) {
+                resultCard.classList.add('low'); badge.classList.add('badge-low'); badge.innerText = "Düşük Kazanç";
+            } else if (hourlyWon >= 5 && hourlyWon < 10) {
+                resultCard.classList.add('mid'); badge.classList.add('badge-mid'); badge.innerText = "Orta Kazanç";
+            } else {
+                resultCard.classList.add('high'); badge.classList.add('badge-high'); badge.innerText = "Yüksek Kazanç";
+            }
+        }
+    }
+
+    function applyAfkBadgeAndCardStyle(dailyWon) {
+        const resultCard = document.getElementById('result-card');
+        const badge = document.getElementById('profit-badge');
+        resultCard.className = "card result-card";
+        badge.className = "profit-badge";
+
+        if (dailyWon < 7) {
+            resultCard.classList.add('low');
+            badge.classList.add('badge-low');
+            badge.innerText = "Düşük Kazanç";
+        } else if (dailyWon >= 7 && dailyWon <= 10) {
+            resultCard.classList.add('mid');
+            badge.classList.add('badge-mid');
+            badge.innerText = "Orta Kazanç";
+        } else {
+            resultCard.classList.add('high');
+            badge.classList.add('badge-high');
+            badge.innerText = "Yüksek Kazanç";
+        }
+    }
+
+    function convertCurrency(source) {
+        const rate = parseFloat(document.getElementById('calc-won-price').value) || 7.65;
+        let won = 0;
+        if(source === 'won') {
+            won = parseFloat(document.getElementById('conv-won').value) || 0;
+            document.getElementById('conv-yang').value = (won * 100).toFixed(0);
+            document.getElementById('conv-tl').value = (won * rate).toFixed(2);
+        } else if(source === 'yang') {
+            won = (parseFloat(document.getElementById('conv-yang').value) || 0) / 100;
+            document.getElementById('conv-won').value = won.toFixed(2);
+            document.getElementById('conv-tl').value = (won * rate).toFixed(2);
+        } else if(source === 'tl') {
+            won = (parseFloat(document.getElementById('conv-tl').value) || 0) / rate;
+            document.getElementById('conv-won').value = won.toFixed(2);
+            document.getElementById('conv-yang').value = (won * 100).toFixed(0);
+        }
+    }
+
+    let savedNotes = [];
+    let editingIndex = -1;
+
+    function saveNewNote() {
+        playClickSound();
+        const inputEl = document.getElementById('notepad-input');
+        const text = inputEl.value.trim();
+        if(!text) return;
+        if(editingIndex >= 0) {
+            savedNotes[editingIndex] = text;
+            editingIndex = -1;
+            document.getElementById('save-note-btn').innerText = "Not Olarak Kaydet";
+            document.getElementById('save-note-btn').className = "btn btn-green";
+        } else {
+            savedNotes.push(text);
+        }
+        inputEl.value = "";
+        saveCurrentCharData();
+        renderNotes();
+    }
+
+    function renderNotes() {
+        const container = document.getElementById('saved-notes-container');
+        container.innerHTML = "";
+        savedNotes.forEach((note, idx) => {
+            const card = document.createElement('div');
+            card.className = "note-card";
+            card.innerHTML = `
+                <span style="font-weight:700; color:var(--accent-gold);">Not ${idx + 1}:</span>
+                <span style="flex:1; color:var(--text-main); font-weight:600;">${note}</span>
+                <button class="btn-sm btn-blue" onclick="editNote(${idx})">Düzenle</button>
+                <button class="btn-sm btn-red" onclick="deleteNote(${idx})">Sil</button>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function editNote(idx) {
+        playClickSound();
+        editingIndex = idx;
+        document.getElementById('notepad-input').value = savedNotes[idx];
+        const btn = document.getElementById('save-note-btn');
+        btn.innerText = `Not ${idx + 1}'i Güncelle`;
+        btn.className = "btn btn-blue";
+        document.getElementById('notepad-input').focus();
+    }
+
+    function deleteNote(idx) {
+        playClickSound();
+        if(editingIndex === idx) {
+            editingIndex = -1;
+            document.getElementById('notepad-input').value = "";
+            const btn = document.getElementById('save-note-btn');
+            btn.innerText = "Not Olarak Kaydet";
+            btn.className = "btn btn-green";
+        }
+        savedNotes.splice(idx, 1);
+        saveCurrentCharData();
+        renderNotes();
+    }
+
+    window.onload = () => {
+        updateResetTimers();
+        initCharSystem();
+        onYoharaBossSelectChange();
+        onSungmaMapChange();
+        onServerEventChange();
+        calculateSplit();
+    };
+</script>
+
+</body>
+</html>
